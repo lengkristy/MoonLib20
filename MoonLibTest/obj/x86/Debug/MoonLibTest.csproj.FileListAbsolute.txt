@@ -1,0 +1,13 @@
+D:\vswork\csproject\MoonLib\MoonLibTest\obj\x86\Debug\MoonLibTest.csprojResolveAssemblyReference.cache
+D:\vswork\csproject\MoonLib\MoonLibTest\obj\x86\Debug\MoonLibTest.MainWindow.resources
+D:\vswork\csproject\MoonLib\MoonLibTest\obj\x86\Debug\MoonLibTest.Properties.Resources.resources
+D:\vswork\csproject\MoonLib\MoonLibTest\obj\x86\Debug\MoonLibTest.csproj.GenerateResource.Cache
+D:\vswork\csproject\MoonLib\MoonLibTest\bin\Debug\MoonLibTest.exe
+D:\vswork\csproject\MoonLib\MoonLibTest\bin\Debug\MoonLibTest.pdb
+D:\vswork\csproject\MoonLib\MoonLibTest\bin\Debug\MoonLib.dll
+D:\vswork\csproject\MoonLib\MoonLibTest\bin\Debug\Newtonsoft.Json.dll
+D:\vswork\csproject\MoonLib\MoonLibTest\bin\Debug\MoonLib.pdb
+D:\vswork\csproject\MoonLib\MoonLibTest\bin\Debug\Newtonsoft.Json.pdb
+D:\vswork\csproject\MoonLib\MoonLibTest\bin\Debug\Newtonsoft.Json.xml
+D:\vswork\csproject\MoonLib\MoonLibTest\obj\x86\Debug\MoonLibTest.exe
+D:\vswork\csproject\MoonLib\MoonLibTest\obj\x86\Debug\MoonLibTest.pdb

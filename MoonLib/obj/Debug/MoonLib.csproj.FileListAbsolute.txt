@@ -1,0 +1,8 @@
+D:\vswork\csproject\MoonLib\MoonLib\bin\Debug\MoonLib.dll
+D:\vswork\csproject\MoonLib\MoonLib\bin\Debug\MoonLib.pdb
+D:\vswork\csproject\MoonLib\MoonLib\obj\Debug\MoonLib.dll
+D:\vswork\csproject\MoonLib\MoonLib\obj\Debug\MoonLib.pdb
+D:\vswork\csproject\MoonLib\MoonLib\obj\Debug\MoonLib.csprojResolveAssemblyReference.cache
+D:\vswork\csproject\MoonLib\MoonLib\bin\Debug\Newtonsoft.Json.dll
+D:\vswork\csproject\MoonLib\MoonLib\bin\Debug\Newtonsoft.Json.pdb
+D:\vswork\csproject\MoonLib\MoonLib\bin\Debug\Newtonsoft.Json.xml

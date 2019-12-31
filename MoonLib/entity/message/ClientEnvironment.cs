@@ -30,5 +30,10 @@ namespace MoonLib.entity.message
         /// sdk的令牌
         /// </summary>
         public string connect_sdk_token;
+
+        /// <summary>
+        /// 客户端id，该客户端id是用于在该客户端的整个网络生命周期内的标识，用于接收发送消息，应该具有唯一性
+        /// </summary>
+        public string client_id;
     }
 }

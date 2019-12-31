@@ -29,5 +29,15 @@ namespace MoonLib.entity
         /// 消息大小
         /// </summary>
         public int msg_size;
+
+        /// <summary>
+        /// 消息发送时间
+        /// </summary>
+        public string msg_time;
+
+        /// <summary>
+        /// 发送消息的客户端id
+        /// </summary>
+        public string client_id;
     }
 }

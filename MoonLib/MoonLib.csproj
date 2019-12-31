@@ -44,14 +44,17 @@
     <Compile Include="core\cmm\DefaultCommunicator.cs" />
     <Compile Include="core\cmm\ICommunicator.cs" />
     <Compile Include="core\cmm\IMessageCallBack.cs" />
+    <Compile Include="core\common\Constant.cs" />
     <Compile Include="core\IMoonClient.cs" />
     <Compile Include="core\MoonClient.cs" />
     <Compile Include="entity\Message.cs" />
     <Compile Include="entity\MessageBody.cs" />
     <Compile Include="entity\MessageHead.cs" />
     <Compile Include="entity\message\ClientEnvironment.cs" />
+    <Compile Include="entity\message\PTPMessage.cs" />
     <Compile Include="entity\MoonProtocol.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="util\DateTimeUtil.cs" />
     <Compile Include="util\UUIDUtil.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -16,10 +16,17 @@ namespace MoonLib.core.cmm
         /// <param name="messageCallback"></param>
         void RegistServerMessageCallback(IMessageCallBack messageCallback);
 
+
         /// <summary>
-        /// 用户id，这里登陆不需要用户密码，只需要用户id，用户密码在第三方系统中做控制
+        /// 获取服务器客户端列表
         /// </summary>
-        /// <param name="id"></param>
-        void Login(string id);
+        void GetServerClientInfoList();
+
+
+        /// <summary>
+        /// 向某个用户发送消息
+        /// </summary>
+        /// <param name="userId"></param>
+        void SendTextMessageToUser(string userId,string strMsg);
     }
 }

@@ -14,9 +14,10 @@ namespace MoonLib.core
         /// <summary>
         /// 连接服务器
         /// </summary>
+        /// <param name="clientId">客户端id</param>
         /// <param name="ip"></param>
         /// <param name="port"></param>
-        void ConnectServer(string ip, int port);
+        void ConnectServer(string clientId,string ip, int port);
 
         /// <summary>
         /// 获取通信器

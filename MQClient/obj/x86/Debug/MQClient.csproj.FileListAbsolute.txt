@@ -1,0 +1,16 @@
+D:\vswork\csproject\MoonLib20\MQClient\bin\Debug\MQClient.exe
+D:\vswork\csproject\MoonLib20\MQClient\bin\Debug\MQClient.pdb
+D:\vswork\csproject\MoonLib20\MQClient\bin\Debug\CSkin.dll
+D:\vswork\csproject\MoonLib20\MQClient\bin\Debug\MoonLib.dll
+D:\vswork\csproject\MoonLib20\MQClient\bin\Debug\Newtonsoft.Json.dll
+D:\vswork\csproject\MoonLib20\MQClient\bin\Debug\MoonLib.pdb
+D:\vswork\csproject\MoonLib20\MQClient\bin\Debug\CSkin.xml
+D:\vswork\csproject\MoonLib20\MQClient\bin\Debug\Newtonsoft.Json.pdb
+D:\vswork\csproject\MoonLib20\MQClient\bin\Debug\Newtonsoft.Json.xml
+D:\vswork\csproject\MoonLib20\MQClient\obj\x86\Debug\MQClient.csprojResolveAssemblyReference.cache
+D:\vswork\csproject\MoonLib20\MQClient\obj\x86\Debug\MQClient.Properties.Resources.resources
+D:\vswork\csproject\MoonLib20\MQClient\obj\x86\Debug\MQClient.csproj.GenerateResource.Cache
+D:\vswork\csproject\MoonLib20\MQClient\obj\x86\Debug\MQClient.exe
+D:\vswork\csproject\MoonLib20\MQClient\obj\x86\Debug\MQClient.pdb
+D:\vswork\csproject\MoonLib20\MQClient\obj\x86\Debug\MQClient.LoginForm.resources
+D:\vswork\csproject\MoonLib20\MQClient\obj\x86\Debug\MQClient.Setting.resources

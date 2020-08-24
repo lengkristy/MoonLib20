@@ -9,6 +9,7 @@ using MoonLib.util;
 using MoonLib.entity.message;
 using MoonLib.core.cmm;
 using System.Threading;
+using MoonLib.core.common;
 
 namespace MoonLib.core
 {
@@ -26,6 +27,11 @@ namespace MoonLib.core
         /// 发送消息同步锁
         /// </summary>
         private object sendMsgSyncLock = new object();
+
+        /// <summary>
+        /// 上一次发送的消息时间
+        /// </summary>
+        private long lastSendMessageTime;
 
         /// <summary>
         /// 上一次发送的消息服务端是否回复
@@ -103,17 +109,22 @@ namespace MoonLib.core
                 message.message_head.client_id = this.client_id;
                 //设置发送时间
                 message.message_head.msg_time = DateTimeUtil.GetTimeStamp();
+                //设置消息id
+                message.message_head.msg_id = CreateMsgId("NodeOne");
+
                 string messageStr = JsonConvert.SerializeObject(message);
                 byte[] byteArray = System.Text.Encoding.UTF8.GetBytes(messageStr);
 
                 byte[] headFlag = System.Text.Encoding.UTF8.GetBytes(MoonProtocol.Packge.PKG_HEAD_FLAG);
+
+                byte[] tailFlag = Encoding.UTF8.GetBytes(MoonProtocol.Packge.PKG_TAIL_FLAG);
 
                 byte[] dataLength = new byte[4];
                 string strDataLength = byteArray.Length.ToString().PadLeft(4, '0');//数字转化成4位字符串，不足在前面补”0“
 
                 dataLength = System.Text.Encoding.UTF8.GetBytes(strDataLength);
 
-                byte[] pkg = new byte[byteArray.Length + headFlag.Length + dataLength.Length];
+                byte[] pkg = new byte[byteArray.Length + headFlag.Length + tailFlag.Length + dataLength.Length];
 
                 int pkgPos = 0;
 
@@ -131,17 +142,37 @@ namespace MoonLib.core
                 {
                     pkg[pkgPos] = byteArray[i];
                 }
-
+                for (int i = 0; i < tailFlag.Length; i++,pkgPos++)
+                {
+                    pkg[pkgPos] = tailFlag[i];
+                }
                 if (message.message_head.main_msg_num == MoonProtocol.SYS_MAIN_PROTOCOL_CONNECT_INIT) 
                 {
                     clientSocket.Send(pkg);
                     return;
                 }
-                //如果发送的消息不是连接初始化消息，那么需要设置等待服务端回复
-                if (!this.lastSentMessageHasReply)
+                long responeTime = long.Parse(DateTimeUtil.GetTimeStamp()) - this.lastSendMessageTime;
+                //如果服务器响应时间在允许的范围之内，那么将待发送的消息放入消息队列
+                if (!(this.lastSentMessageHasReply || (responeTime >= Constant.MSG_SERVER_REPLY_TIMEOUT)))
                 {
-                    //需要将消息放入队列，等待发送
-                    msgQueue.Enqueue(message);
+                    LogUtil.Debug("服务器对于上次消息未响应", "服务器对于上次消息未响应");
+                    this.msgQueue.Enqueue(message);
+                    return;
+                }
+                //如果服务器响应时间在不在允许的范围之内，那么通知第三方可能连接丢失或者服务器卡
+                if (!(this.lastSentMessageHasReply || (responeTime < Constant.MSG_SERVER_REPLY_TIMEOUT)))
+                {
+                    LogUtil.Debug("服务器对于上次消息未响应", "服务器对于上次消息未响应");
+                    Message message2 = new Message
+                    {
+                        message_head =
+                        {
+                            main_msg_num = MoonProtocol.LocalProtocol.SYS_MAIN_PROTOCOL_SERVER_NOT_REPLY,
+                            sub_msg_num = -1
+                        },
+                        message_body = { content = this.lastSentMessageId }
+                    };
+                    this.defaultCommunicator.GetMessageCallback().ServerMessageHandler(message2);
                     return;
                 }
                 clientSocket.Send(pkg);
@@ -155,42 +186,89 @@ namespace MoonLib.core
         /// </summary>
         private void RecvServerMessage()
         {
+            StringBuilder builder = new StringBuilder();
             while (true)
             {
                 try
                 {
-                    byte[] buffer = new byte[1024 * 1024];
-                    int n = clientSocket.Receive(buffer);
-                    string strMessage = Encoding.UTF8.GetString(buffer, 0, n);
-                    Message message = JsonConvert.DeserializeObject <Message>(strMessage);
-                    bool isUserMsg = UserDealMessage(message);
-
-                    if (!isUserMsg)
+                    byte[] buffer = new byte[MoonProtocol.Packge.PKG_BYTE_MAX_LENGTH];
+                    int count = this.clientSocket.Receive(buffer);
+                    string str = Encoding.UTF8.GetString(buffer, 0, count);
+                    int length = -1;
+                    int pos_tail_flag = -1;
+                    while (!string.IsNullOrEmpty(str))
                     {
-                        DealSystemMessage(message);
+                        length = str.IndexOf(MoonProtocol.Packge.PKG_HEAD_FLAG);
+                        if (length == -1)
+                        {
+                            builder.Append(str);
+                            str = "";
+                        }
+                        else
+                        {
+                            if (length > 0)
+                            {
+                                builder.Append(str.Substring(0, length));
+                                str = str.Substring(length);
+                            }
+                            for (int i = 0; i < MoonProtocol.Packge.PKG_HEAD_LENGTH; i++)
+                            {
+                                builder.Append(str[i]);
+                            }
+                            str = str.Substring(MoonProtocol.Packge.PKG_HEAD_LENGTH);
+                        }
                     }
-
-                    if (this.defaultCommunicator.GetMessageCallback() != null && isUserMsg)
+                    for (pos_tail_flag = builder.ToString().IndexOf(MoonProtocol.Packge.PKG_TAIL_FLAG); pos_tail_flag != -1; pos_tail_flag = builder.ToString().IndexOf(MoonProtocol.Packge.PKG_TAIL_FLAG))
                     {
-                        this.defaultCommunicator.GetMessageCallback().ServerMessageHandler(message);
+                        length = builder.ToString().IndexOf(MoonProtocol.Packge.PKG_HEAD_FLAG);
+                        if (length < pos_tail_flag)
+                        {
+                            this.DataPackageParse(builder.ToString().Substring(length, pos_tail_flag + MoonProtocol.Packge.PKG_TAIL_LENGTH));
+                            builder = builder.Remove(length, pos_tail_flag + MoonProtocol.Packge.PKG_TAIL_LENGTH);
+                        }
                     }
-
-                    
                 }
-                catch (Exception e)
+                catch (Exception exception)
                 {
                     if (this.defaultCommunicator.GetMessageCallback() != null)
                     {
-                        Message message = new Message();
-                        message.message_head.main_msg_num = MoonProtocol.CommunicationException.SYS_MAIN_PROTOCOL_MSG;
-                        message.message_head.sub_msg_num = MoonProtocol.CommunicationException.SYS_SUB_PROTOCOL_OUT_CONNECT;
-                        message.message_body.content = e.Message;
+                        Message message = new Message
+                        {
+                            message_head =
+                            {
+                                main_msg_num = MoonProtocol.CommunicationException.SYS_MAIN_PROTOCOL_MSG,
+                                sub_msg_num = MoonProtocol.CommunicationException.SYS_SUB_PROTOCOL_OUT_CONNECT
+                            },
+                            message_body = { content = exception.Message }
+                        };
                         this.defaultCommunicator.GetMessageCallback().ServerMessageHandler(message);
-                        break;
                     }
                 }
             }
+
         }
+
+        /// <summary>
+        /// 处理数据包
+        /// </summary>
+        /// <param name="strMessage"></param>
+        private void DataPackageParse(string strMessage)
+        {
+            strMessage = strMessage.Replace(MoonProtocol.Packge.PKG_HEAD_FLAG, "").Replace(MoonProtocol.Packge.PKG_TAIL_FLAG, "");
+            strMessage = strMessage.Substring(4);
+            LogUtil.Info("消息缓存：", strMessage);
+            Message message = JsonConvert.DeserializeObject<Message>(strMessage);
+            bool flag = this.UserDealMessage(message);
+            if (!flag)
+            {
+                this.DealSystemMessage(message);
+            }
+            if ((this.defaultCommunicator.GetMessageCallback() != null) && flag)
+            {
+                this.defaultCommunicator.GetMessageCallback().ServerMessageHandler(message);
+            }
+        }
+
 
         /// <summary>
         /// 判断是否是用户处理消息
@@ -247,6 +325,15 @@ namespace MoonLib.core
             clientEnvironment.opra_system_version = System.Environment.OSVersion.VersionString;
             message.message_body.content = clientEnvironment;
             return message;
+        }
+
+        /// <summary>
+        /// 创建消息id，消息id的命名规则：通信服务节点名称+ 32位uuid
+        /// </summary>
+        /// <returns></returns>
+        private string CreateMsgId(string serverNodeName)
+        {
+            return serverNodeName + "-" + UUIDUtil.Generator32UUID();
         }
 
 

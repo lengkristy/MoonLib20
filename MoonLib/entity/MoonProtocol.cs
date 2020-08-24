@@ -35,9 +35,41 @@ namespace MoonLib.entity
             public static int PKG_BYTE_MAX_LENGTH = 9999;
 
             /// <summary>
-            /// 包头前4字节定义标识
+            /// 包头标识
             /// </summary>
-            public static string PKG_HEAD_FLAG = "MNPH";
+            public static string PKG_HEAD_FLAG = "\n\rMNPH\n\r";
+
+            /// <summary>
+            /// 包头长度
+            /// </summary>
+            public static int PKG_HEAD_LENGTH = 12;
+
+            /// <summary>
+            /// 包尾标识
+            /// </summary>
+            public static string PKG_TAIL_FLAG = "\n\rMNPT\n\r";
+
+            /// <summary>
+            /// 包尾长度
+            /// </summary>
+            public static int PKG_TAIL_LENGTH = 8;
+
+        }
+
+        /// <summary>
+        /// 本地协议，用于通知第三方，不和服务器交互
+        /// </summary>
+        public static class LocalProtocol
+        {
+            /// <summary>
+            /// 服务端没有响应客户端消息
+            /// </summary>
+            public static int SYS_MAIN_PROTOCOL_SERVER_NOT_REPLY = 90001;
+
+            /// <summary>
+            /// 
+            /// </summary>
+            public static int SYS_MAIN_PROTOCOL_CLIENT_SEND_SERVER_MSG = 90002;
         }
 
         /// <summary>

@@ -16,6 +16,9 @@ namespace MoonLibTest
 {
     public partial class MainWindow : Form, IMessageCallBack
     {
+        private string ip;
+
+        private string port;
 
         private List<IMoonClient> moonClient = new List<IMoonClient>();
 
@@ -34,29 +37,30 @@ namespace MoonLibTest
         {
             if (message.message_head.main_msg_num == MoonProtocol.ServeClientInfo.SYS_MAIN_PROTOCOL_SCI)
             {
-                this.Invoke(new Action<String>((data) =>
-                {
-                    this.listBoxMsg.Items.Add(data);
-                }),"有新消息到来");
+                //this.Invoke(new Action<String>((data) =>
+                //{
+                //    this.listBoxMsg.Items.Add(data);
+                //}),"有新消息到来");
                 
-                this.Invoke(new Action<JArray>((data) =>
-                {
-                    if (data.Count > 0)
-                    {
-                        string clients = string.Empty;
-                        for (int i = 0; i < data.Count; i++)
-                        {
-                            clients += data[i].ToString() + ",";
-                        }
-                        this.listBoxMsg.Items.Add(clients);
-                    }
-                }), message.message_body.content);
+                //this.Invoke(new Action<JArray>((data) =>
+                //{
+                //    if (data.Count > 0)
+                //    {
+                //        string clients = string.Empty;
+                //        for (int i = 0; i < data.Count; i++)
+                //        {
+                //            clients += data[i].ToString() + ",";
+                //        }
+                //        this.listBoxMsg.Items.Add(clients);
+                //    }
+                //}), message.message_body.content);
             }
         }
 
         private void btnCreate_Click(object sender, EventArgs e)
         {
-            
+            this.ip = this.txbIP.Text;
+            this.port = this.txbPort.Text;
 
             int count = Int32.Parse(this.txtBobCount.Text);
 
@@ -76,12 +80,12 @@ namespace MoonLibTest
             IMoonClient client = ClientFactory.GetDefaultClient();
             moonClient.Add(client);
             client.GetCommunicator().RegistServerMessageCallback(this);
-            client.ConnectServer(UUIDUtil.Generator32UUID(), "127.0.0.1", 8890);
+            client.ConnectServer(UUIDUtil.Generator32UUID(), this.ip, int.Parse(this.port));
             while (true)
             {
-                System.Threading.Thread.Sleep(5000);
                 ////成功之后，向服务端发起获取所有客户端列表
                 client.GetCommunicator().GetServerClientInfoList();
+                System.Threading.Thread.Sleep(5000);
             }
         }
     }

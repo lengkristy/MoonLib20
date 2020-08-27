@@ -49,8 +49,8 @@ namespace MoonLib.core.cmm
         public void SendTextMessageToUser(string userId, string strMsg)
         {
             Message message = new Message();
-            message.message_head.main_msg_num = MoonProtocol.PointToPointMsg.SYS_MAIN_PROTOCOL_MSG_POINT_TO_POINT;
-            message.message_head.sub_msg_num = MoonProtocol.PointToPointMsg.SYS_SUB_PROTOCOL_MSG_PTP_TEXT;
+            message.message_head.main_msg_num = MoonProtocol.PointToPointMsg.MN_PROTOCOL_MAIN_MSG_POINT_TO_POINT;
+            message.message_head.sub_msg_num = MoonProtocol.PointToPointMsg.MN_PROTOCOL_SUB_MSG_PTP_TEXT;
             PTPMessage ptpMsg = new PTPMessage();
             ptpMsg.from_client_id = this.moonClient.getClientId();
             ptpMsg.to_client_id = userId;
@@ -63,8 +63,8 @@ namespace MoonLib.core.cmm
         public void GetServerClientInfoList()
         {
             Message message = new Message();
-            message.message_head.main_msg_num = MoonProtocol.ServeClientInfo.SYS_MAIN_PROTOCOL_SCI;
-            message.message_head.sub_msg_num = MoonProtocol.ServeClientInfo.SYS_SUB_PROTOCOL_ALL_CLIENT_LIST;
+            message.message_head.main_msg_num = MoonProtocol.ServeClientInfo.MN_PROTOCOL_MAIN_SCI;
+            message.message_head.sub_msg_num = MoonProtocol.ServeClientInfo.MN_PROTOCOL_MAIN_ALL_CLIENT_LIST;
             this.moonClient.SendMessage(message);
         }
     }

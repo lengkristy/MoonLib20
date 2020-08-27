@@ -35,7 +35,7 @@ namespace MoonLibTest
 
         public void ServerMessageHandler(MoonLib.entity.Message message)
         {
-            if (message.message_head.main_msg_num == MoonProtocol.ServeClientInfo.SYS_MAIN_PROTOCOL_SCI)
+            if (message.message_head.main_msg_num == MoonProtocol.ServeClientInfo.MN_PROTOCOL_MAIN_SCI)
             {
                 //this.Invoke(new Action<String>((data) =>
                 //{
@@ -84,8 +84,9 @@ namespace MoonLibTest
             while (true)
             {
                 ////成功之后，向服务端发起获取所有客户端列表
-                client.GetCommunicator().GetServerClientInfoList();
                 System.Threading.Thread.Sleep(5000);
+                client.GetCommunicator().GetServerClientInfoList();
+                System.Threading.Thread.Sleep(10000);
             }
         }
     }

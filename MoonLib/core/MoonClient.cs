@@ -146,7 +146,7 @@ namespace MoonLib.core
                 {
                     pkg[pkgPos] = tailFlag[i];
                 }
-                if (message.message_head.main_msg_num == MoonProtocol.SYS_MAIN_PROTOCOL_CONNECT_INIT) 
+                if (message.message_head.main_msg_num == MoonProtocol.MN_PROTOCOL_MAIN_CONNECT_INIT) 
                 {
                     clientSocket.Send(pkg);
                     return;
@@ -167,7 +167,7 @@ namespace MoonLib.core
                     {
                         message_head =
                         {
-                            main_msg_num = MoonProtocol.LocalProtocol.SYS_MAIN_PROTOCOL_SERVER_NOT_REPLY,
+                            main_msg_num = MoonProtocol.LocalProtocol.MN_PROTOCOL_MAIN_SERVER_NOT_REPLY,
                             sub_msg_num = -1
                         },
                         message_body = { content = this.lastSentMessageId }
@@ -236,14 +236,15 @@ namespace MoonLib.core
                         {
                             message_head =
                             {
-                                main_msg_num = MoonProtocol.CommunicationException.SYS_MAIN_PROTOCOL_MSG,
-                                sub_msg_num = MoonProtocol.CommunicationException.SYS_SUB_PROTOCOL_OUT_CONNECT
+                                main_msg_num = MoonProtocol.CommunicationException.MN_PROTOCOL_MAIN_MSG,
+                                sub_msg_num = MoonProtocol.CommunicationException.MN_PROTOCOL_SUB_OUT_CONNECT
                             },
                             message_body = { content = exception.Message }
                         };
                         this.defaultCommunicator.GetMessageCallback().ServerMessageHandler(message);
                     }
                 }
+                Thread.Sleep(10);
             }
 
         }
@@ -277,7 +278,7 @@ namespace MoonLib.core
         /// <returns></returns>
         private bool UserDealMessage(Message message)
         {
-            if (message.message_head.main_msg_num == MoonProtocol.ServerReply.SYS_MAIN_PROTOCOL_REPLY)
+            if (message.message_head.main_msg_num == MoonProtocol.ServerReply.MN_PROTOCOL_MAIN_REPLY)
             {
                 return false;
             }
@@ -292,7 +293,7 @@ namespace MoonLib.core
         private void DealSystemMessage(Message message)
         {
             //如果是系统回复消息
-            if (MoonProtocol.ServerReply.SYS_MAIN_PROTOCOL_REPLY.Equals(message.message_head.main_msg_num))
+            if (MoonProtocol.ServerReply.MN_PROTOCOL_MAIN_REPLY.Equals(message.message_head.main_msg_num))
             {
                 lock (this.sendMsgSyncLock)
                 {
@@ -315,8 +316,8 @@ namespace MoonLib.core
         {
             Message message = new Message();
             message.message_head.msg_id = UUIDUtil.Generator32UUID();
-            message.message_head.main_msg_num = MoonProtocol.SYS_MAIN_PROTOCOL_CONNECT_INIT;
-            message.message_head.sub_msg_num = MoonProtocol.SYS_SUB_PROTOCOL_CLIENT_CON;
+            message.message_head.main_msg_num = MoonProtocol.MN_PROTOCOL_MAIN_CONNECT_INIT;
+            message.message_head.sub_msg_num = MoonProtocol.MN_PROTOCOL_SUB_CLIENT_CON;
             ClientEnvironment clientEnvironment = new ClientEnvironment();
             clientEnvironment.client_platform = "windows";
             clientEnvironment.client_sdk_version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();

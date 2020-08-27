@@ -11,9 +11,14 @@ namespace MoonLib.entity
     public class MessageHead
     {
         /// <summary>
-        /// 消息id，在整个网络中流转的消息唯一标识
+        /// 消息id，在整个网络中流转的消息唯一标识，由服务节点名称+uuid构成，如：
         /// </summary>
         public string msg_id;
+
+        /// <summary>
+        /// 消息次序
+        /// </summary>
+        public int msg_order;
 
         /// <summary>
         /// 主消息号

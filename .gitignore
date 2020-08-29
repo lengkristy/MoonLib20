@@ -62,4 +62,10 @@ _ReSharper*
 # Installshield output folder  
 [Ee]xpress  
   
-OutPut/
+OutPut/*
+
+MoonLib/obj/*
+
+MoonLibTest/obj/*
+
+MQClient/obj/*

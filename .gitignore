@@ -62,19 +62,4 @@ _ReSharper*
 # Installshield output folder  
 [Ee]xpress  
   
-# DocProject is a documentation generator add-in  
-DocProject/buildhelp/  
-DocProject/Help  
-UpgradeLog*.XML  
-  
-# Lightswitch  
-_Pvt_Extensions  
-GeneratedArtifacts  
-*.xap  
-ModelManifest.xml  
-  
-#Backup file  
-*.bak
-
-#zzzili
-v15/
+OutPut/

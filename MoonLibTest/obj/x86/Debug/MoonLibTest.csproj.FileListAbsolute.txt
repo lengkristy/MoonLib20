@@ -24,3 +24,16 @@ D:\vswork\csproject\MoonLib20\MoonLibTest\obj\x86\Debug\MoonLibTest.csprojResolv
 D:\vswork\csproject\MoonLib20\MoonLibTest\obj\x86\Debug\MoonLibTest.MainWindow.resources
 D:\vswork\csproject\MoonLib20\MoonLibTest\obj\x86\Debug\MoonLibTest.Properties.Resources.resources
 D:\vswork\csproject\MoonLib20\MoonLibTest\obj\x86\Debug\MoonLibTest.csproj.GenerateResource.Cache
+D:\通信服务器的设计\源代码\MoonLib20\MoonLibTest\obj\x86\Debug\MoonLibTest.exe
+D:\通信服务器的设计\源代码\MoonLib20\MoonLibTest\obj\x86\Debug\MoonLibTest.pdb
+D:\通信服务器的设计\源代码\MoonLib20\MoonLibTest\bin\Debug\MoonLibTest.exe
+D:\通信服务器的设计\源代码\MoonLib20\MoonLibTest\bin\Debug\MoonLibTest.pdb
+D:\通信服务器的设计\源代码\MoonLib20\MoonLibTest\bin\Debug\MoonLib.dll
+D:\通信服务器的设计\源代码\MoonLib20\MoonLibTest\bin\Debug\Newtonsoft.Json.dll
+D:\通信服务器的设计\源代码\MoonLib20\MoonLibTest\bin\Debug\MoonLib.pdb
+D:\通信服务器的设计\源代码\MoonLib20\MoonLibTest\bin\Debug\Newtonsoft.Json.pdb
+D:\通信服务器的设计\源代码\MoonLib20\MoonLibTest\bin\Debug\Newtonsoft.Json.xml
+D:\通信服务器的设计\源代码\MoonLib20\MoonLibTest\obj\x86\Debug\MoonLibTest.csprojResolveAssemblyReference.cache
+D:\通信服务器的设计\源代码\MoonLib20\MoonLibTest\obj\x86\Debug\MoonLibTest.MainWindow.resources
+D:\通信服务器的设计\源代码\MoonLib20\MoonLibTest\obj\x86\Debug\MoonLibTest.Properties.Resources.resources
+D:\通信服务器的设计\源代码\MoonLib20\MoonLibTest\obj\x86\Debug\MoonLibTest.csproj.GenerateResource.Cache

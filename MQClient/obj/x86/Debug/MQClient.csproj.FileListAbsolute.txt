@@ -14,3 +14,13 @@ D:\vswork\csproject\MoonLib20\MQClient\obj\x86\Debug\MQClient.exe
 D:\vswork\csproject\MoonLib20\MQClient\obj\x86\Debug\MQClient.pdb
 D:\vswork\csproject\MoonLib20\MQClient\obj\x86\Debug\MQClient.LoginForm.resources
 D:\vswork\csproject\MoonLib20\MQClient\obj\x86\Debug\MQClient.Setting.resources
+D:\通信服务器的设计\源代码\MoonLib20\OutPut\MQClient.exe
+D:\通信服务器的设计\源代码\MoonLib20\OutPut\MQClient.pdb
+D:\通信服务器的设计\源代码\MoonLib20\MQClient\obj\x86\Debug\MQClient.csprojResolveAssemblyReference.cache
+D:\通信服务器的设计\源代码\MoonLib20\MQClient\obj\x86\Debug\MQClient.LoginForm.resources
+D:\通信服务器的设计\源代码\MoonLib20\MQClient\obj\x86\Debug\MQClient.Properties.Resources.resources
+D:\通信服务器的设计\源代码\MoonLib20\MQClient\obj\x86\Debug\MQClient.Setting.resources
+D:\通信服务器的设计\源代码\MoonLib20\MQClient\obj\x86\Debug\MQClient.csproj.GenerateResource.Cache
+D:\通信服务器的设计\源代码\MoonLib20\MQClient\obj\x86\Debug\MQClient.exe
+D:\通信服务器的设计\源代码\MoonLib20\MQClient\obj\x86\Debug\MQClient.pdb
+D:\通信服务器的设计\源代码\MoonLib20\MQClient\obj\x86\Debug\MQClient.FrmLogin.resources

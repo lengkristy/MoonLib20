@@ -44,6 +44,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="App.cs" />
+    <Compile Include="FrmLogin.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmLogin.Designer.cs">
+      <DependentUpon>FrmLogin.cs</DependentUpon>
+    </Compile>
     <Compile Include="LoginForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -59,6 +66,9 @@
     <Compile Include="Setting.Designer.cs">
       <DependentUpon>Setting.cs</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="FrmLogin.resx">
+      <DependentUpon>FrmLogin.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="LoginForm.resx">
       <DependentUpon>LoginForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -70,6 +80,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <EmbeddedResource Include="Setting.resx">
       <DependentUpon>Setting.cs</DependentUpon>
@@ -89,6 +100,150 @@
       <Project>{110FA44A-5203-4FFC-A302-419E309D0270}</Project>
       <Name>MoonLib</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\4.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\afternoon.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\aio_head_normal.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\aio_setting_down.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\aio_setting_hover.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\aio_setting_normal.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\aio_setting_white_down.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\aio_setting_white_hover.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\aio_setting_white_normal.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\allbtn_down.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\allbtn_highlight.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\BackPalace.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\BackPalace1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\btn_Down.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\btn_Mouse.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\btn_norml.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Full_close_down.PNG" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Full_close_hover.PNG" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Full_close_normal.PNG" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\icon_close_down.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\icon_close_hover.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\icon_close_normal.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\main_1.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\main_2.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\main_3.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\main_4.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\main_5.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\main_6.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\main_7.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\menu_btn_highlight.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\menu_btn_normal.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\morning.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\night.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\noon.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\set_icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\ShadowPalace.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\sysbtn_close_down.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\sysbtn_close_hover.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\sysbtn_close_normal.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\sysbtn_max_down.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\sysbtn_max_hover.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\sysbtn_max_normal.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\sysbtn_min_down.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\sysbtn_min_hover.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\sysbtn_min_normal.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\sysbtn_restore_down.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\sysbtn_restore_hover.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\sysbtn_restore_normal.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

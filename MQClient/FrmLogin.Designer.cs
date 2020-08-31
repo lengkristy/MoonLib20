@@ -199,6 +199,7 @@
             this.btnLogin.TabIndex = 3;
             this.btnLogin.Text = "登  录";
             this.btnLogin.UseVisualStyleBackColor = false;
+            this.btnLogin.Click += new System.EventHandler(this.btnLogin_Click);
             // 
             // FrmLogin
             // 
@@ -244,7 +245,7 @@
             this.ShowDrawIcon = false;
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "FrmLogin";
+            this.Text = "5";
             this.TopMost = true;
             this.pnlTx.ResumeLayout(false);
             this.ResumeLayout(false);

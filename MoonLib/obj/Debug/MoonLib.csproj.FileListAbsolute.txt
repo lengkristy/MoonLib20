@@ -24,3 +24,5 @@ D:\通信服务器的设计\源代码\MoonLib20\MoonLib\obj\Debug\MoonLib.dll
 D:\通信服务器的设计\源代码\MoonLib20\MoonLib\obj\Debug\MoonLib.pdb
 D:\通信服务器的设计\源代码\MoonLib20\OutPut\MoonLib.dll
 D:\通信服务器的设计\源代码\MoonLib20\OutPut\MoonLib.pdb
+D:\vswork\csproject\MoonLib20\OutPut\MoonLib.dll
+D:\vswork\csproject\MoonLib20\OutPut\MoonLib.pdb

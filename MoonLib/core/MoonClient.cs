@@ -44,6 +44,11 @@ namespace MoonLib.core
         private string lastSentMessageId = string.Empty;
 
         /// <summary>
+        /// 服务端是否同意接受客户端连接
+        /// </summary>
+        public bool serviceAgreeAccept = false;
+
+        /// <summary>
         /// 消息队列
         /// </summary>
         private Queue<Message> msgQueue = new Queue<Message>();
@@ -146,11 +151,13 @@ namespace MoonLib.core
                 {
                     pkg[pkgPos] = tailFlag[i];
                 }
-                if (message.message_head.main_msg_num == MoonProtocol.MN_PROTOCOL_MAIN_CONNECT_INIT) 
+                if (message.message_head.main_msg_num == MoonProtocol.InitProtocol.MN_PROTOCOL_MAIN_CONNECT_INIT) 
                 {
                     clientSocket.Send(pkg);
                     return;
                 }
+                //如果服务端不同意接受连接则不能发送数据包
+                if (!this.serviceAgreeAccept) return;
                 long responeTime = long.Parse(DateTimeUtil.GetTimeStamp()) - this.lastSendMessageTime;
                 //如果服务器响应时间在允许的范围之内，那么将待发送的消息放入消息队列
                 if (!(this.lastSentMessageHasReply || (responeTime >= Constant.MSG_SERVER_REPLY_TIMEOUT)))
@@ -278,7 +285,8 @@ namespace MoonLib.core
         /// <returns></returns>
         private bool UserDealMessage(Message message)
         {
-            if (message.message_head.main_msg_num == MoonProtocol.ServerReply.MN_PROTOCOL_MAIN_REPLY)
+            if (message.message_head.main_msg_num == MoonProtocol.ServerReply.MN_PROTOCOL_MAIN_REPLY
+                || message.message_head.main_msg_num == MoonProtocol.InitProtocol.MN_PROTOCOL_MAIN_CONNECT_INIT)
             {
                 return false;
             }
@@ -292,7 +300,7 @@ namespace MoonLib.core
         /// <param name="message"></param>
         private void DealSystemMessage(Message message)
         {
-            //如果是系统回复消息
+            //如果是系统回复上一次消息
             if (MoonProtocol.ServerReply.MN_PROTOCOL_MAIN_REPLY.Equals(message.message_head.main_msg_num))
             {
                 lock (this.sendMsgSyncLock)
@@ -303,6 +311,15 @@ namespace MoonLib.core
                 if (this.msgQueue.Count > 0)
                 {
                     this.SendMessage(this.msgQueue.Dequeue());
+                }
+            }
+            else if (MoonProtocol.InitProtocol.MN_PROTOCOL_MAIN_CONNECT_INIT.Equals(message.message_head.main_msg_num))//服务端反馈客户端初始化连接消息
+            {
+                //服务端同意接收连接
+                if (MoonProtocol.InitProtocol.MN_PROTOCOL_SUB_SERVER_ACCEPT.Equals(message.message_head.sub_msg_num))
+                {
+                    this.serviceAgreeAccept = true;
+                    defaultCommunicator = new DefaultCommunicator(this);
                 }
             }
         }
@@ -316,8 +333,8 @@ namespace MoonLib.core
         {
             Message message = new Message();
             message.message_head.msg_id = UUIDUtil.Generator32UUID();
-            message.message_head.main_msg_num = MoonProtocol.MN_PROTOCOL_MAIN_CONNECT_INIT;
-            message.message_head.sub_msg_num = MoonProtocol.MN_PROTOCOL_SUB_CLIENT_CON;
+            message.message_head.main_msg_num = MoonProtocol.InitProtocol.MN_PROTOCOL_MAIN_CONNECT_INIT;
+            message.message_head.sub_msg_num = MoonProtocol.InitProtocol.MN_PROTOCOL_SUB_CLIENT_CON;
             ClientEnvironment clientEnvironment = new ClientEnvironment();
             clientEnvironment.client_platform = "windows";
             clientEnvironment.client_sdk_version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();

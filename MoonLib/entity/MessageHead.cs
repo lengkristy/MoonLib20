@@ -44,5 +44,10 @@ namespace MoonLib.entity
         /// 发送消息的客户端id
         /// </summary>
         public string client_id;
+
+        /// <summary>
+        /// 消息结束标识，解决多侦的问题，对于同一个消息id的消息如果消息没有传输完成，那么则为1，消息传输完成则为0
+        /// </summary>
+        public int msg_end;
     }
 }

@@ -9,26 +9,33 @@ namespace MoonLib.entity
     /// </summary>
     public class MoonProtocol
     {
-        /*********************************************************************************************************************************************************/
         /// <summary>
-        /// 客户端连接初始化主协议号，客户端连接服务器成功后的第一条消息，将会把客户端的运行环境信息传递过来
+        /// 初始化协议
         /// </summary>
-        public static int MN_PROTOCOL_MAIN_CONNECT_INIT = 10001;
+        public static class InitProtocol
+        {
+            /*********************************************************************************************************************************************************/
+            /// <summary>
+            /// 客户端连接初始化主协议号，客户端连接服务器成功后的第一条消息，将会把客户端的运行环境信息传递过来
+            /// </summary>
+            public static int MN_PROTOCOL_MAIN_CONNECT_INIT = 10001;
 
-        /// <summary>
-        /// server connection sub-Protocol(used to cluster)，集群使用
-        /// </summary>
-        public static int MN_PROTOCOL_SUB_SERVER_CON = 1000101;
+            /// <summary>
+            /// server connection sub-Protocol(used to cluster)，集群使用
+            /// </summary>
+            public static int MN_PROTOCOL_SUB_SERVER_CON = 1000101;
 
-        /// <summary>
-        /// client connection sub-Protocol，客户端连接的子协议
-        /// </summary>
-        public static int MN_PROTOCOL_SUB_CLIENT_CON = 1000102;
+            /// <summary>
+            /// client connection sub-Protocol，客户端连接的子协议
+            /// </summary>
+            public static int MN_PROTOCOL_SUB_CLIENT_CON = 1000102;
 
-        /// <summary>
-        /// 服务端同意接受连接的子协议
-        /// </summary>
-        public static int MN_PROTOCOL_SUB_SERVER_ACCEPT = 1000109;
+            /// <summary>
+            /// 服务端同意接受连接的子协议
+            /// </summary>
+            public static int MN_PROTOCOL_SUB_SERVER_ACCEPT = 1000109;
+        }
+        
 
         /*********************************************************************************************************************************************************/
 

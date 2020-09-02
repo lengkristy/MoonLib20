@@ -137,5 +137,15 @@ namespace MoonLib.entity
             public static int MN_PROTOCOL_SUB_MSG_PTP_VIDE = 1000204; //点对点的短视频消息
             public static int MN_PROTOCOL_SUB_MSG_PTP_FILE	= 1000205; //点对点的文件传输消息
         }
+
+        /// <summary>
+        /// 广播消息协议，广播消息主要是用于群消息发送
+        /// </summary>
+        public static class BroadcastMsg
+        {
+            public static int MN_PROTOCOL_MAIN_BROADCAST = 10005;//广播消息的主协议代码
+            public static int MN_PROTOCOL_SUB_SYS_BROADCAST = 1000501;//系统广播消息
+            public static int MN_PROTOCOL_SUB_USER_BROADCAST = 1000502;//发送用户群组消息
+        }
     }
 }

@@ -50,6 +50,7 @@
     <Compile Include="entity\Message.cs" />
     <Compile Include="entity\MessageBody.cs" />
     <Compile Include="entity\MessageHead.cs" />
+    <Compile Include="entity\message\BroadcastMessage.cs" />
     <Compile Include="entity\message\ClientEnvironment.cs" />
     <Compile Include="entity\message\PTPMessage.cs" />
     <Compile Include="entity\MoonProtocol.cs" />

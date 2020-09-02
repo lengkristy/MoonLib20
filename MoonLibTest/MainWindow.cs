@@ -85,7 +85,8 @@ namespace MoonLibTest
             {
                 ////成功之后，向服务端发起获取所有客户端列表
                 System.Threading.Thread.Sleep(5000);
-                client.GetCommunicator().GetServerClientInfoList();
+                //client.GetCommunicator().GetServerClientInfoList();
+                client.GetCommunicator().SendTextMessageToUser("124354","2132哈哈");
                 System.Threading.Thread.Sleep(10000);
             }
         }

@@ -24,9 +24,17 @@ namespace MoonLib.core.cmm
 
 
         /// <summary>
-        /// 向某个用户发送消息
+        /// 向某个用户发送文本消息
         /// </summary>
         /// <param name="userId"></param>
         void SendTextMessageToUser(string userId,string strMsg);
+
+        /// <summary>
+        /// 发送群文本消息
+        /// </summary>
+        /// <param name="groupId">群id</param>
+        /// <param name="userIds">用户列表</param>
+        /// <param name="content">内容</param>
+        void SendTextMessageToGroup(string groupId,List<string> userIds,string content);
     }
 }

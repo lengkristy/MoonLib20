@@ -110,13 +110,6 @@ namespace MoonLib.core
         {
             lock (sendMsgSyncLock)
             {
-                //设置客户端id
-                message.message_head.client_id = this.client_id;
-                //设置发送时间
-                message.message_head.msg_time = DateTimeUtil.GetTimeStamp();
-                //设置消息id
-                message.message_head.msg_id = CreateMsgId("NodeOne");
-
                 string messageStr = JsonConvert.SerializeObject(message);
                 byte[] byteArray = System.Text.Encoding.UTF8.GetBytes(messageStr);
 
@@ -343,15 +336,6 @@ namespace MoonLib.core
             clientEnvironment.opra_system_version = System.Environment.OSVersion.VersionString;
             message.message_body.content = clientEnvironment;
             return message;
-        }
-
-        /// <summary>
-        /// 创建消息id，消息id的命名规则：通信服务节点名称+ 32位uuid
-        /// </summary>
-        /// <returns></returns>
-        private string CreateMsgId(string serverNodeName)
-        {
-            return serverNodeName + "-" + UUIDUtil.Generator32UUID();
         }
 
 

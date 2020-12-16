@@ -13,11 +13,19 @@ namespace MoonLib.entity
         /// <summary>
         /// 消息头
         /// </summary>
-        public MessageHead message_head = new MessageHead();
+        public MessageHead Head
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// 消息体
         /// </summary>
-        public MessageBody message_body = new MessageBody();
+        public MessageBody Body
+        {
+            get;
+            set;
+        }
     }
 }

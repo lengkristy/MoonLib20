@@ -4,30 +4,38 @@ using System.Text;
 using MoonLib.entity;
 using MoonLib.util;
 using MoonLib.entity.message;
+using MoonLib.core.cmm.callback;
+using Newtonsoft.Json;
 
 namespace MoonLib.core.cmm
 {
     /// <summary>
     /// 默认通信器
     /// </summary>
-    internal class DefaultCommunicator : ICommunicator
+    internal class DefaultCommunicator : ICommunicator,IMessageCallBack
     { 
 
-        /// <summary>
-        /// 消息回调接口
-        /// </summary>
-        private IMessageCallBack messageCallback;
-
         private MoonClient moonClient;
+
+        //系统消息回调
+        private SysMessageCallback sysMessageCallback;
+
+        //点对点消息回调
+        private PTPMessageCallback ptpMessageCallback;
+
+        //广播消息回调
+        private BroadcastMessageCallback broadcastMessageCallback;
 
         internal DefaultCommunicator(MoonClient moonClient)
         {
             this.moonClient = moonClient;
         }
 
-        public void RegistServerMessageCallback(IMessageCallBack messageCallback)
+        public void RegistCallback(SysMessageCallback sysMessageCallback, PTPMessageCallback ptpMessageCallback, BroadcastMessageCallback broadcastMessageCallback)
         {
-            this.messageCallback = messageCallback;
+            this.sysMessageCallback = sysMessageCallback;
+            this.ptpMessageCallback = ptpMessageCallback;
+            this.broadcastMessageCallback = broadcastMessageCallback;
         }
 
 
@@ -37,7 +45,7 @@ namespace MoonLib.core.cmm
         /// <returns></returns>
         internal IMessageCallBack GetMessageCallback()
         {
-            return this.messageCallback;
+            return this;
         }
 
 
@@ -49,18 +57,20 @@ namespace MoonLib.core.cmm
         public void SendTextMessageToUser(string userId, string strMsg)
         {
             Message message = new Message();
-            message.message_head.msg_id = CreateMsgId("node1");
-            message.message_head.msg_order = 0;
-            message.message_head.msg_time = DateTimeUtil.GetTimeStamp();
-            message.message_head.msg_size = strMsg.Length;
-            message.message_head.main_msg_num = MoonProtocol.PointToPointMsg.MN_PROTOCOL_MAIN_MSG_POINT_TO_POINT;
-            message.message_head.sub_msg_num = MoonProtocol.PointToPointMsg.MN_PROTOCOL_SUB_MSG_PTP_TEXT;
+            message.Head = new MessageHead();
+            message.Body = new MessageBody();
+            message.Head.MsgId = CreateMsgId("node1");
+            message.Head.MsgOrder = 0;
+            message.Head.MsgTime = DateTimeUtil.GetTimeStamp();
+            message.Head.MsgSize = strMsg.Length;
+            message.Head.MainMsgNum = MoonProtocol.PointToPointMsg.MN_PROTOCOL_MAIN_MSG_POINT_TO_POINT;
+            message.Head.SubMsgNum = MoonProtocol.PointToPointMsg.MN_PROTOCOL_SUB_MSG_PTP_TEXT;
             
             PTPMessage ptpMsg = new PTPMessage();
             ptpMsg.from_client_id = this.moonClient.getClientId();
             ptpMsg.to_client_id = userId;
             ptpMsg.context = strMsg;
-            message.message_body.content = ptpMsg;
+            message.Body.Content = JsonConvert.SerializeObject(ptpMsg);
             this.moonClient.SendMessage(message);
         }
 
@@ -68,8 +78,8 @@ namespace MoonLib.core.cmm
         public void GetServerClientInfoList()
         {
             Message message = new Message();
-            message.message_head.main_msg_num = MoonProtocol.ServeClientInfo.MN_PROTOCOL_MAIN_SCI;
-            message.message_head.sub_msg_num = MoonProtocol.ServeClientInfo.MN_PROTOCOL_MAIN_ALL_CLIENT_LIST;
+            message.Head.MainMsgNum = MoonProtocol.ServeClientInfo.MN_PROTOCOL_MAIN_SCI;
+            message.Head.SubMsgNum = MoonProtocol.ServeClientInfo.MN_PROTOCOL_MAIN_ALL_CLIENT_LIST;
             this.moonClient.SendMessage(message);
         }
 
@@ -78,12 +88,14 @@ namespace MoonLib.core.cmm
         public void SendTextMessageToGroup(string groupId, List<string> userIds, string content)
         {
             Message message = new Message();
-            message.message_head.msg_id = CreateMsgId("node1");
-            message.message_head.msg_order = 0;
-            message.message_head.msg_time = DateTimeUtil.GetTimeStamp();
-            message.message_head.msg_size = content.Length;
-            message.message_head.main_msg_num = MoonProtocol.BroadcastMsg.MN_PROTOCOL_MAIN_BROADCAST;
-            message.message_head.sub_msg_num = MoonProtocol.BroadcastMsg.MN_PROTOCOL_SUB_GROUP_BROADCAST;
+            message.Head = new MessageHead();
+            message.Body = new MessageBody();
+            message.Head.MsgId = CreateMsgId("node1");
+            message.Head.MsgOrder = 0;
+            message.Head.MsgTime = DateTimeUtil.GetTimeStamp();
+            message.Head.MsgSize = content.Length;
+            message.Head.MainMsgNum = MoonProtocol.BroadcastMsg.MN_PROTOCOL_MAIN_BROADCAST;
+            message.Head.SubMsgNum = MoonProtocol.BroadcastMsg.MN_PROTOCOL_SUB_USER_TEXT_BROADCAST;
             UserBroadcastMessage broadcastMessage = new UserBroadcastMessage();
             broadcastMessage.group_id = groupId;
             broadcastMessage.from_client_id = this.moonClient.getClientId();
@@ -92,7 +104,7 @@ namespace MoonLib.core.cmm
             {
                 broadcastMessage.to_client_ids.Add(usrId);
             }
-            message.message_body.content = broadcastMessage;
+            message.Body.Content = JsonConvert.SerializeObject(broadcastMessage);
             this.moonClient.SendMessage(message);
         }
 
@@ -104,5 +116,55 @@ namespace MoonLib.core.cmm
         {
             return serverNodeName + "-" + UUIDUtil.Generator32UUID();
         }
+
+        /// <summary>
+        /// 处理系统所有消息，并且解析消息类型，然后分发下去
+        /// </summary>
+        /// <param name="message"></param>
+        public void ServerMessageHandler(Message message)
+        {
+            switch (message.Head.MainMsgNum)
+            {
+                //点对点消息
+                case MoonProtocol.PointToPointMsg.MN_PROTOCOL_MAIN_MSG_POINT_TO_POINT:
+                    ParsePTPMessage(message);
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// 处理点对点消息
+        /// </summary>
+        /// <param name="message"></param>
+        private void ParsePTPMessage(Message message)
+        {
+            if (ptpMessageCallback != null)
+            {
+                PTPMessage ptpMessage = JsonConvert.DeserializeObject<PTPMessage>(Convert.ToString(message.Body.Content));
+                switch (message.Head.SubMsgNum)
+                {
+                    case MoonProtocol.PointToPointMsg.MN_PROTOCOL_SUB_MSG_PTP_TEXT://文本消息
+                        ptpMessageCallback.ReceiveTextNewMessage(ptpMessage.from_client_id, ptpMessage.context);
+                        break;
+                    case MoonProtocol.PointToPointMsg.MN_PROTOCOL_SUB_MSG_PTP_EMOTICON://表情消息
+                        ptpMessageCallback.ReceiveEmoticonNewMessage(ptpMessage.from_client_id, ptpMessage.context);
+                        break;
+                    case MoonProtocol.PointToPointMsg.MN_PROTOCOL_SUB_MSG_PTP_IMG://图片消息
+                        ptpMessageCallback.ReceiveImageNewMessage(ptpMessage.from_client_id, ptpMessage.context);
+                        break;
+                    case MoonProtocol.PointToPointMsg.MN_PROTOCOL_SUB_MSG_PTP_VIDE://短视频消息
+                        ptpMessageCallback.RecevieVideoNewMessage(ptpMessage.from_client_id, ptpMessage.context);
+                        break;
+                    case MoonProtocol.PointToPointMsg.MN_PROTOCOL_SUB_MSG_PTP_FILE: //文件传输消息
+                        ptpMessageCallback.ReceiveFileNewMessage(ptpMessage.from_client_id, ptpMessage.context);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
     }
 }

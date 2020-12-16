@@ -35,7 +35,7 @@ namespace MoonLibTest
 
         public void ServerMessageHandler(MoonLib.entity.Message message)
         {
-            if (message.message_head.main_msg_num == MoonProtocol.ServeClientInfo.MN_PROTOCOL_MAIN_SCI)
+            if (message.Head.MainMsgNum == MoonProtocol.ServeClientInfo.MN_PROTOCOL_MAIN_SCI)
             {
                 //this.Invoke(new Action<String>((data) =>
                 //{
@@ -79,7 +79,7 @@ namespace MoonLibTest
         {
             IMoonClient client = ClientFactory.GetDefaultClient();
             moonClient.Add(client);
-            client.GetCommunicator().RegistServerMessageCallback(this);
+            //client.GetCommunicator().RegistServerMessageCallback(this);
             client.ConnectServer(UUIDUtil.Generator32UUID(), this.ip, int.Parse(this.port));
             while (true)
             {

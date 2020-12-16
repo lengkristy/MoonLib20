@@ -13,41 +13,41 @@ namespace MoonLib.entity
         /// <summary>
         /// 消息id，在整个网络中流转的消息唯一标识，由服务节点名称+uuid构成，如：
         /// </summary>
-        public string msg_id;
+        public string MsgId { get; set; }
 
         /// <summary>
         /// 消息次序
         /// </summary>
-        public int msg_order;
+        public int MsgOrder { get; set; }
 
         /// <summary>
         /// 主消息号
         /// </summary>
-        public int main_msg_num;
+        public int MainMsgNum { get; set; }
 
         /// <summary>
         /// 子消息号
         /// </summary>
-        public int sub_msg_num;
+        public int SubMsgNum { get; set; }
 
         /// <summary>
-        /// 消息大小
+        /// 消息大小，整个消息body的大小
         /// </summary>
-        public int msg_size;
+        public int MsgSize { get; set; }
 
         /// <summary>
         /// 消息发送时间
         /// </summary>
-        public string msg_time;
+        public string MsgTime { get; set; }
 
         /// <summary>
         /// 发送消息的客户端id
         /// </summary>
-        public string client_id;
+        public string ClientId { get; set; }
 
         /// <summary>
         /// 消息结束标识，解决多侦的问题，对于同一个消息id的消息如果消息没有传输完成，那么则为1，消息传输完成则为0
         /// </summary>
-        public int msg_end;
+        public int MsgEnd { get; set; }
     }
 }

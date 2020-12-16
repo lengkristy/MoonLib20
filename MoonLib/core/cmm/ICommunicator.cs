@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MoonLib.core.cmm.callback;
 
 namespace MoonLib.core.cmm
 {
@@ -11,11 +12,12 @@ namespace MoonLib.core.cmm
     {
 
         /// <summary>
-        /// 注册服务端消息回调
+        /// 注册消息回调接口
         /// </summary>
-        /// <param name="messageCallback"></param>
-        void RegistServerMessageCallback(IMessageCallBack messageCallback);
-
+        /// <param name="sysMessageCallback"></param>
+        /// <param name="ptpMessageCallback"></param>
+        /// <param name="broadcastMessageCallback"></param>
+        void RegistCallback(SysMessageCallback sysMessageCallback,PTPMessageCallback ptpMessageCallback,BroadcastMessageCallback broadcastMessageCallback);
 
         /// <summary>
         /// 获取服务器客户端列表

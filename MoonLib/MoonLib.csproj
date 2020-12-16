@@ -41,6 +41,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="core\ClientFactory.cs" />
+    <Compile Include="core\cmm\callback\BroadcastMessageCallback.cs" />
+    <Compile Include="core\cmm\callback\SysMessageCallback.cs" />
+    <Compile Include="core\cmm\callback\PTPMessageCallback.cs" />
     <Compile Include="core\cmm\DefaultCommunicator.cs" />
     <Compile Include="core\cmm\ICommunicator.cs" />
     <Compile Include="core\cmm\IMessageCallBack.cs" />
@@ -50,7 +53,7 @@
     <Compile Include="entity\Message.cs" />
     <Compile Include="entity\MessageBody.cs" />
     <Compile Include="entity\MessageHead.cs" />
-    <Compile Include="entity\message\BroadcastMessage.cs" />
+    <Compile Include="entity\message\UserBroadcastMessage.cs" />
     <Compile Include="entity\message\ClientEnvironment.cs" />
     <Compile Include="entity\message\PTPMessage.cs" />
     <Compile Include="entity\MoonProtocol.cs" />

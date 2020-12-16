@@ -14,26 +14,26 @@ namespace MoonLib.entity.message
         /// <summary>
         /// sdk版本
         /// </summary>
-        public string client_sdk_version;
+        public string ClientSDKVersion { get; set; }
 
         /// <summary>
         /// 客户端平台信息，client platform info,windows/linux/android/ios
         /// </summary>
-        public string client_platform;
+        public string ClientPlatform { get; set; }
 
         /// <summary>
         /// 操作系统版本
         /// </summary>
-        public string opra_system_version;
+        public string OpraSystemVersion { get; set; }
 
         /// <summary>
         /// sdk的令牌
         /// </summary>
-        public string connect_sdk_token;
+        public string ConnectSDKToken { get; set; }
 
         /// <summary>
         /// 客户端id，该客户端id是用于在该客户端的整个网络生命周期内的标识，用于接收发送消息，应该具有唯一性
         /// </summary>
-        public string client_id;
+        public string ClientId { get; set; }
     }
 }

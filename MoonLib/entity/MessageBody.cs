@@ -11,8 +11,12 @@ namespace MoonLib.entity
     public class MessageBody
     {
         /// <summary>
-        /// 消息内容
+        /// 消息内容，消息内容以字符串进行传输
         /// </summary>
-        public object content;
+        public string Content 
+        { 
+            get; 
+            set;
+        }
     }
 }

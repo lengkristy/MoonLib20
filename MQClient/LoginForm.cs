@@ -45,7 +45,6 @@ namespace MQClient
             try
             {
                 moonClient = ClientFactory.GetDefaultClient();
-                moonClient.GetCommunicator().RegistServerMessageCallback(new MoonMessageCallBack());
                 moonClient.ConnectServer(UUIDUtil.Generator32UUID(), ServerIP, Int32.Parse(ServerPort));
             }
             catch (Exception ex)

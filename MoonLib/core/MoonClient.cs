@@ -144,7 +144,7 @@ namespace MoonLib.core
                 {
                     pkg[pkgPos] = tailFlag[i];
                 }
-                if (message.message_head.main_msg_num == MoonProtocol.InitProtocol.MN_PROTOCOL_MAIN_CONNECT_INIT) 
+                if (message.Head.MainMsgNum == MoonProtocol.InitProtocol.MN_PROTOCOL_MAIN_CONNECT_INIT) 
                 {
                     clientSocket.Send(pkg);
                     return;
@@ -165,18 +165,18 @@ namespace MoonLib.core
                     LogUtil.Debug("服务器对于上次消息未响应", "服务器对于上次消息未响应");
                     Message message2 = new Message
                     {
-                        message_head =
+                        Head =
                         {
-                            main_msg_num = MoonProtocol.LocalProtocol.MN_PROTOCOL_MAIN_SERVER_NOT_REPLY,
-                            sub_msg_num = -1
+                            MainMsgNum = MoonProtocol.LocalProtocol.MN_PROTOCOL_MAIN_SERVER_NOT_REPLY,
+                            SubMsgNum = -1
                         },
-                        message_body = { content = this.lastSentMessageId }
+                        Body = { Content = this.lastSentMessageId }
                     };
                     this.defaultCommunicator.GetMessageCallback().ServerMessageHandler(message2);
                     return;
                 }
                 clientSocket.Send(pkg);
-                lastSentMessageId = message.message_head.msg_id;
+                lastSentMessageId = message.Head.MsgId;
                 this.lastSentMessageHasReply = false;
             }
         }
@@ -234,12 +234,12 @@ namespace MoonLib.core
                     {
                         Message message = new Message
                         {
-                            message_head =
+                            Head =
                             {
-                                main_msg_num = MoonProtocol.CommunicationException.MN_PROTOCOL_MAIN_MSG,
-                                sub_msg_num = MoonProtocol.CommunicationException.MN_PROTOCOL_SUB_OUT_CONNECT
+                                MainMsgNum = MoonProtocol.CommunicationException.MN_PROTOCOL_MAIN_MSG,
+                                SubMsgNum = MoonProtocol.CommunicationException.MN_PROTOCOL_SUB_OUT_CONNECT
                             },
-                            message_body = { content = exception.Message }
+                            Body = { Content = exception.Message }
                         };
                         this.defaultCommunicator.GetMessageCallback().ServerMessageHandler(message);
                     }
@@ -278,8 +278,8 @@ namespace MoonLib.core
         /// <returns></returns>
         private bool UserDealMessage(Message message)
         {
-            if (message.message_head.main_msg_num == MoonProtocol.ServerReply.MN_PROTOCOL_MAIN_REPLY
-                || message.message_head.main_msg_num == MoonProtocol.InitProtocol.MN_PROTOCOL_MAIN_CONNECT_INIT)
+            if (message.Head.MainMsgNum == MoonProtocol.ServerReply.MN_PROTOCOL_MAIN_REPLY
+                || message.Head.MainMsgNum == MoonProtocol.InitProtocol.MN_PROTOCOL_MAIN_CONNECT_INIT)
             {
                 return false;
             }
@@ -294,7 +294,7 @@ namespace MoonLib.core
         private void DealSystemMessage(Message message)
         {
             //如果是系统回复上一次消息
-            if (MoonProtocol.ServerReply.MN_PROTOCOL_MAIN_REPLY.Equals(message.message_head.main_msg_num))
+            if (MoonProtocol.ServerReply.MN_PROTOCOL_MAIN_REPLY.Equals(message.Head.MainMsgNum))
             {
                 lock (this.sendMsgSyncLock)
                 {
@@ -306,10 +306,10 @@ namespace MoonLib.core
                     this.SendMessage(this.msgQueue.Dequeue());
                 }
             }
-            else if (MoonProtocol.InitProtocol.MN_PROTOCOL_MAIN_CONNECT_INIT.Equals(message.message_head.main_msg_num))//服务端反馈客户端初始化连接消息
+            else if (MoonProtocol.InitProtocol.MN_PROTOCOL_MAIN_CONNECT_INIT.Equals(message.Head.MainMsgNum))//服务端反馈客户端初始化连接消息
             {
                 //服务端同意接收连接
-                if (MoonProtocol.InitProtocol.MN_PROTOCOL_SUB_SERVER_ACCEPT.Equals(message.message_head.sub_msg_num))
+                if (MoonProtocol.InitProtocol.MN_PROTOCOL_SUB_SERVER_ACCEPT.Equals(message.Head.SubMsgNum))
                 {
                     this.serviceAgreeAccept = true;
                     defaultCommunicator = new DefaultCommunicator(this);
@@ -325,16 +325,18 @@ namespace MoonLib.core
         private Message GetInitConnectMessage(string clientId)
         {
             Message message = new Message();
-            message.message_head.msg_id = UUIDUtil.Generator32UUID();
-            message.message_head.main_msg_num = MoonProtocol.InitProtocol.MN_PROTOCOL_MAIN_CONNECT_INIT;
-            message.message_head.sub_msg_num = MoonProtocol.InitProtocol.MN_PROTOCOL_SUB_CLIENT_CON;
+            message.Head = new MessageHead();
+            message.Body = new MessageBody();
+            message.Head.MsgId = UUIDUtil.Generator32UUID();
+            message.Head.MainMsgNum = MoonProtocol.InitProtocol.MN_PROTOCOL_MAIN_CONNECT_INIT;
+            message.Head.SubMsgNum = MoonProtocol.InitProtocol.MN_PROTOCOL_SUB_CLIENT_CON;
             ClientEnvironment clientEnvironment = new ClientEnvironment();
-            clientEnvironment.client_platform = "windows";
-            clientEnvironment.client_sdk_version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
-            clientEnvironment.connect_sdk_token = "";
-            clientEnvironment.client_id = clientId;
-            clientEnvironment.opra_system_version = System.Environment.OSVersion.VersionString;
-            message.message_body.content = clientEnvironment;
+            clientEnvironment.ClientPlatform = "windows";
+            clientEnvironment.ClientSDKVersion = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            clientEnvironment.ConnectSDKToken = "";
+            clientEnvironment.ClientId = clientId;
+            clientEnvironment.OpraSystemVersion = System.Environment.OSVersion.VersionString;
+            message.Body.Content = JsonConvert.SerializeObject(clientEnvironment);
             return message;
         }
 

@@ -9,5 +9,10 @@ namespace MoonLib.core.cmm.callback
     /// </summary>
     public interface SysMessageCallback
     {
+        /// <summary>
+        /// 接收通信服务节点所有的在线客户端列表
+        /// </summary>
+        /// <param name="clientList"></param>
+        void RecvServerNodeAllOnlineClientList(string clientList);
     }
 }

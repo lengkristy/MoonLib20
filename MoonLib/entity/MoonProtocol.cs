@@ -50,6 +50,18 @@ namespace MoonLib.entity
             public const int MN_PROTOCOL_SUB_SERVER_CHECK = 1000201;
 
         }
+
+        /// <summary>
+        /// 服务端回复消息协议，当客户端发送消息到服务端之后，服务端会回复是否收到
+        /// </summary>
+        public static class ServerReply
+        {
+            public const int MN_PROTOCOL_MAIN_REPLY = 10003;//服务端回复主协议代码
+
+            public const int MN_PROTOCOL_SUB_REPLY_OK = 1000301;//服务端收到消息成功的子协议代码
+
+            public const int MN_PROTOCOL_SUB_REPLY_FAILD = 1000302;//服务端收到消息处理失败的子协议代码
+        }
         
 
         /*********************************************************************************************************************************************************/
@@ -106,18 +118,6 @@ namespace MoonLib.entity
             /// 
             /// </summary>
             public const int MN_PROTOCOL_MAIN_CLIENT_SEND_SERVER_MSG = 90002;
-        }
-
-        /// <summary>
-        /// 服务端回复消息协议
-        /// </summary>
-        public static class ServerReply
-        {
-            public const int MN_PROTOCOL_MAIN_REPLY = 10003;//服务端回复主协议代码
-
-            public const int MN_PROTOCOL_SUB_REPLY_OK = 1000301;//服务端收到消息成功的子协议代码
-
-            public const int MN_PROTOCOL_SUB_REPLY_FAILD = 1000302;//服务端收到消息失败的子协议代码
         }
 
         /// <summary>

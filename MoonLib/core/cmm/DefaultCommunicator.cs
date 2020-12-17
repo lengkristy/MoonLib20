@@ -80,6 +80,7 @@ namespace MoonLib.core.cmm
             Message message = new Message();
             message.Head = new MessageHead();
             message.Body = new MessageBody();
+            message.Head.ClientId = this.moonClient.getClientId();
             message.Head.MainMsgNum = MoonProtocol.ServeClientInfo.MN_PROTOCOL_MAIN_SCI;
             message.Head.SubMsgNum = MoonProtocol.ServeClientInfo.MN_PROTOCOL_MAIN_ALL_CLIENT_LIST;
             this.moonClient.SendMessage(message);
@@ -127,12 +128,35 @@ namespace MoonLib.core.cmm
         {
             switch (message.Head.MainMsgNum)
             {
+                //获取当前服务节点的客户端列表信息
+                case MoonProtocol.ServeClientInfo.MN_PROTOCOL_MAIN_SCI:
+                    ParseSystemMessage(message);
+                    break;
                 //点对点消息
                 case MoonProtocol.PointToPointMsg.MN_PROTOCOL_MAIN_MSG_POINT_TO_POINT:
                     ParsePTPMessage(message);
                     break;
                 default:
                     break;
+            }
+        }
+
+        /// <summary>
+        /// 解析系统消息
+        /// </summary>
+        /// <param name="message"></param>
+        private void ParseSystemMessage(Message message)
+        {
+            if (sysMessageCallback != null)
+            {
+                switch (message.Head.SubMsgNum)
+                {
+                    case MoonProtocol.ServeClientInfo.MN_PROTOCAL_MAIN_ALL_CLIENBT_LIST_OK: //获取服务节点所有的在线客户端列表
+                        sysMessageCallback.RecvServerNodeAllOnlineClientList(Convert.ToString(message.Body.Content));
+                        break;
+                    default:
+                        break;
+                }
             }
         }
 

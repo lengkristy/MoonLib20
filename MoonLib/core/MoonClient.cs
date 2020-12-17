@@ -238,6 +238,7 @@ namespace MoonLib.core
             {
                 if (data[i] != headFlag[i])
                 {
+                    //改成异常的方式抛出
                     LogUtil.Error("解析数据包出错，数据包头部标识错误，数据包内容：", Encoding.UTF8.GetString(data));
                     return null;
                 }
@@ -346,7 +347,7 @@ namespace MoonLib.core
             {
                 this.DealSystemMessage(message);
             }
-            if ((this.defaultCommunicator.GetMessageCallback() != null) && flag)
+            if (this.defaultCommunicator != null && this.defaultCommunicator.GetMessageCallback() != null && flag)
             {
                 this.defaultCommunicator.GetMessageCallback().ServerMessageHandler(message);
             }

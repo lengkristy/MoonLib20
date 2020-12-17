@@ -11,10 +11,11 @@ using MoonLib.entity;
 using MoonLib.util;
 using Newtonsoft.Json.Linq;
 using System.Threading;
+using MoonLib.core.cmm.callback;
 
 namespace MoonLibTest
 {
-    public partial class MainWindow : Form, IMessageCallBack
+    public partial class MainWindow : Form, SysMessageCallback
     {
         private string ip;
 
@@ -30,31 +31,6 @@ namespace MoonLibTest
         private void MainWindow_Load(object sender, EventArgs e)
         {
             
-        }
-
-
-        public void ServerMessageHandler(MoonLib.entity.Message message)
-        {
-            if (message.Head.MainMsgNum == MoonProtocol.ServeClientInfo.MN_PROTOCOL_MAIN_SCI)
-            {
-                //this.Invoke(new Action<String>((data) =>
-                //{
-                //    this.listBoxMsg.Items.Add(data);
-                //}),"有新消息到来");
-                
-                //this.Invoke(new Action<JArray>((data) =>
-                //{
-                //    if (data.Count > 0)
-                //    {
-                //        string clients = string.Empty;
-                //        for (int i = 0; i < data.Count; i++)
-                //        {
-                //            clients += data[i].ToString() + ",";
-                //        }
-                //        this.listBoxMsg.Items.Add(clients);
-                //    }
-                //}), message.message_body.content);
-            }
         }
 
         private void btnCreate_Click(object sender, EventArgs e)
@@ -79,7 +55,7 @@ namespace MoonLibTest
         {
             IMoonClient client = ClientFactory.GetDefaultClient();
             moonClient.Add(client);
-            //client.GetCommunicator().RegistServerMessageCallback(this);
+            client.GetCommunicator().RegistCallback(this, null, null);
             client.ConnectServer(UUIDUtil.Generator32UUID(), this.ip, int.Parse(this.port));
             while (true)
             {
@@ -89,6 +65,11 @@ namespace MoonLibTest
                 //client.GetCommunicator().SendTextMessageToUser("124354","2132哈哈");
                 System.Threading.Thread.Sleep(10000);
             }
+        }
+
+        public void RecvServerNodeAllOnlineClientList(string clientList)
+        {
+            LogUtil.Info("收到服务端消息：", clientList);
         }
     }
 }

@@ -11,7 +11,10 @@ namespace MoonLib.entity
     public class MessageHead
     {
         /// <summary>
-        /// 消息id，在整个网络中流转的消息唯一标识，由服务节点名称+uuid构成，如：
+        /// 消息id，在整个网络中流转的消息唯一标识，由路由节点名称+服务节点名称+uuid构成，如：
+        /// rout2:moonserver1:709482f5aeaa4cbc96cf1bb15a72bdb3
+        /// 这样的目的是为了解决消息路由节点做消息转发的时候能够快速定位发送到哪一个消息路由节点对应的服务节点
+        /// 
         /// </summary>
         public string MsgId { get; set; }
 

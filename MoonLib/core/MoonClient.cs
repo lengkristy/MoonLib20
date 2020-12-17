@@ -163,15 +163,11 @@ namespace MoonLib.core
                 if (!(this.lastSentMessageHasReply || (responeTime < Constant.MSG_SERVER_REPLY_TIMEOUT)))
                 {
                     LogUtil.Debug("服务器对于上次消息未响应", "服务器对于上次消息未响应");
-                    Message message2 = new Message
-                    {
-                        Head =
-                        {
-                            MainMsgNum = MoonProtocol.LocalProtocol.MN_PROTOCOL_MAIN_SERVER_NOT_REPLY,
-                            SubMsgNum = -1
-                        },
-                        Body = { Content = this.lastSentMessageId }
-                    };
+                    Message message2 = new Message();
+                    message2.Head = new MessageHead();
+                    message2.Head.MainMsgNum = MoonProtocol.LocalProtocol.MN_PROTOCOL_MAIN_SERVER_NOT_REPLY;
+                    message2.Body = new MessageBody();
+                    message2.Body.Content = this.lastSentMessageId;
                     this.defaultCommunicator.GetMessageCallback().ServerMessageHandler(message2);
                     return;
                 }
@@ -186,51 +182,34 @@ namespace MoonLib.core
         /// </summary>
         private void RecvServerMessage()
         {
-            StringBuilder builder = new StringBuilder();
+            byte[] data = new byte[MoonProtocol.Packge.PKG_BYTE_MAX_LENGTH];//数据缓存
+            int currentLen = 0;//当前接收的数据长度
             while (true)
             {
                 try
                 {
                     byte[] buffer = new byte[MoonProtocol.Packge.PKG_BYTE_MAX_LENGTH];
-                    int count = this.clientSocket.Receive(buffer);
-                    string str = Encoding.UTF8.GetString(buffer, 0, count);
-                    int length = -1;
-                    int pos_tail_flag = -1;
-                    while (!string.IsNullOrEmpty(str))
+                    int count = this.clientSocket.Receive(buffer); //方法会被阻塞
+                    
+                    //解析数据
+                    string strData = ParsePkgData(buffer, count);
+
+                    if (!string.IsNullOrEmpty(strData))
                     {
-                        length = str.IndexOf(MoonProtocol.Packge.PKG_HEAD_FLAG);
-                        if (length == -1)
-                        {
-                            builder.Append(str);
-                            str = "";
-                        }
-                        else
-                        {
-                            if (length > 0)
-                            {
-                                builder.Append(str.Substring(0, length));
-                                str = str.Substring(length);
-                            }
-                            for (int i = 0; i < MoonProtocol.Packge.PKG_HEAD_LENGTH; i++)
-                            {
-                                builder.Append(str[i]);
-                            }
-                            str = str.Substring(MoonProtocol.Packge.PKG_HEAD_LENGTH);
-                        }
+                        DataPackageParse(strData);
                     }
-                    for (pos_tail_flag = builder.ToString().IndexOf(MoonProtocol.Packge.PKG_TAIL_FLAG); pos_tail_flag != -1; pos_tail_flag = builder.ToString().IndexOf(MoonProtocol.Packge.PKG_TAIL_FLAG))
+                    else
                     {
-                        length = builder.ToString().IndexOf(MoonProtocol.Packge.PKG_HEAD_FLAG);
-                        if (length < pos_tail_flag)
-                        {
-                            this.DataPackageParse(builder.ToString().Substring(length, pos_tail_flag + MoonProtocol.Packge.PKG_TAIL_LENGTH));
-                            builder = builder.Remove(length, pos_tail_flag + MoonProtocol.Packge.PKG_TAIL_LENGTH);
-                        }
+                        //将数据添加到缓存中，可能数据是粘包
+                        Buffer.BlockCopy(buffer, 0, data, currentLen, count);
+                        //拷贝完成之后，查找是否有包尾标识，如果有那么表示有完整数据
+                        ProcessCacheDataPkg(ref data,ref currentLen);
                     }
                 }
                 catch (Exception exception)
                 {
-                    if (this.defaultCommunicator.GetMessageCallback() != null)
+                    LogUtil.Debug("接收数据错误", exception.StackTrace);
+                    if (this.defaultCommunicator != null && this.defaultCommunicator.GetMessageCallback() != null)
                     {
                         Message message = new Message
                         {
@@ -249,6 +228,110 @@ namespace MoonLib.core
 
         }
 
+        //解析包数据，如果成功返回string json数据包，如果失败则返回null
+        private string ParsePkgData(byte[] data,int len)
+        {
+            //判断包头是否一致
+            byte[] headFlag = Encoding.UTF8.GetBytes(MoonProtocol.Packge.PKG_HEAD_FLAG);
+            byte[] tailFlag = Encoding.UTF8.GetBytes(MoonProtocol.Packge.PKG_TAIL_FLAG);
+            for (int i = 0; i < headFlag.Length; i++)
+            {
+                if (data[i] != headFlag[i])
+                {
+                    LogUtil.Error("解析数据包出错，数据包头部标识错误，数据包内容：", Encoding.UTF8.GetString(data));
+                    return null;
+                }
+            }
+
+            //数组的第9到12个字节为数据体长度
+            byte[] bLen = new byte[4];
+            bLen[0] = data[8];
+            bLen[1] = data[9];
+            bLen[2] = data[10];
+            bLen[3] = data[11];
+            string sLen = Encoding.UTF8.GetString(bLen);
+            string tmpLen = sLen;
+            //去掉高位无效的填充0
+            for (int i = 0; i < sLen.Length; i++)
+            {
+                if (sLen[i] != '0')
+                    break;
+                tmpLen.Remove(i, 1);
+            }
+            int iLen = Convert.ToInt32(tmpLen);
+            if (iLen != len - MoonProtocol.Packge.PKG_HEAD_LENGTH - MoonProtocol.Packge.PKG_TAIL_LENGTH)
+            {
+                LogUtil.Error("解析的数据包长度与接收的长度不一致：", Encoding.UTF8.GetString(data));
+                return null;
+            }
+            //判断包尾是否一致
+            for (int i = len - tailFlag.Length, j = 0; i < len; i++,j++)
+            {
+                if (tailFlag[j] != data[i])
+                {
+                    LogUtil.Error("解析数据包出错，数据包尾部标识错误，数据包内容：", Encoding.UTF8.GetString(data));
+                    return null;
+                }
+            }
+            byte[] bData = new byte[len - MoonProtocol.Packge.PKG_HEAD_LENGTH - MoonProtocol.Packge.PKG_TAIL_LENGTH];
+            //
+            for (int i = MoonProtocol.Packge.PKG_HEAD_LENGTH, j = 0; i < len - tailFlag.Length; i++, j++)
+            {
+                bData[j] = data[i];
+            }
+            return Encoding.UTF8.GetString(bData);
+        }
+
+        //处理缓存包
+        private void ProcessCacheDataPkg(ref byte[] data, ref int currentLen)
+        {
+            byte[] tailFlag = Encoding.UTF8.GetBytes(MoonProtocol.Packge.PKG_TAIL_FLAG);
+            int pos = -1;
+	        for (int index = 0; index < currentLen; index++) {
+		        if (index + MoonProtocol.Packge.PKG_TAIL_LENGTH <= currentLen ){
+			        int i = 0;
+			        for (; i < MoonProtocol.Packge.PKG_TAIL_LENGTH; i++ ){
+				        if (data[index+i] != tailFlag[i]) {
+					        break;
+				        }
+			        }
+			        if (i == MoonProtocol.Packge.PKG_TAIL_LENGTH ){
+				        //index的位置就是当前查找到的位置
+                        pos = index;
+                        break;
+			        }
+		        }
+	        }
+
+            if (pos != -1)
+            {
+                //查找到包尾结束标识
+                byte[] bData = new byte[pos + MoonProtocol.Packge.PKG_TAIL_LENGTH + 1];
+                Buffer.BlockCopy(data, 0, data, 0, pos + MoonProtocol.Packge.PKG_TAIL_LENGTH + 1);
+
+                //将源字节数据后面的数据保留
+                currentLen = currentLen - pos - MoonProtocol.Packge.PKG_TAIL_LENGTH - 1;
+                byte[] remainData = new byte[currentLen];
+                Buffer.BlockCopy(data, pos + MoonProtocol.Packge.PKG_TAIL_LENGTH, remainData, 0, currentLen);
+
+                //将数据放入缓存
+                for (int i = 0; i < MoonProtocol.Packge.PKG_BYTE_MAX_LENGTH; i++)
+                {
+                    if (i < currentLen)
+                    {
+                        data[i] = remainData[i];
+                    }
+                    else
+                    {
+                        data[i] = 0x00; //后面全部置为0
+                    }
+                }
+                
+                string strData = ParsePkgData(bData, pos + MoonProtocol.Packge.PKG_TAIL_LENGTH + 1);
+                DataPackageParse(strData);
+            }
+        }
+
         /// <summary>
         /// 处理数据包
         /// </summary>
@@ -256,7 +339,6 @@ namespace MoonLib.core
         private void DataPackageParse(string strMessage)
         {
             strMessage = strMessage.Replace(MoonProtocol.Packge.PKG_HEAD_FLAG, "").Replace(MoonProtocol.Packge.PKG_TAIL_FLAG, "");
-            strMessage = strMessage.Substring(4);
             LogUtil.Info("消息缓存：", strMessage);
             Message message = JsonConvert.DeserializeObject<Message>(strMessage);
             bool flag = this.UserDealMessage(message);
@@ -279,7 +361,8 @@ namespace MoonLib.core
         private bool UserDealMessage(Message message)
         {
             if (message.Head.MainMsgNum == MoonProtocol.ServerReply.MN_PROTOCOL_MAIN_REPLY
-                || message.Head.MainMsgNum == MoonProtocol.InitProtocol.MN_PROTOCOL_MAIN_CONNECT_INIT)
+                || message.Head.MainMsgNum == MoonProtocol.InitProtocol.MN_PROTOCOL_MAIN_CONNECT_INIT
+                || message.Head.MainMsgNum == MoonProtocol.KeepAliveProtocol.MN_PROTOCOL_MAIN_KEEPALIVE)
             {
                 return false;
             }

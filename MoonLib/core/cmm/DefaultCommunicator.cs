@@ -78,6 +78,8 @@ namespace MoonLib.core.cmm
         public void GetServerClientInfoList()
         {
             Message message = new Message();
+            message.Head = new MessageHead();
+            message.Body = new MessageBody();
             message.Head.MainMsgNum = MoonProtocol.ServeClientInfo.MN_PROTOCOL_MAIN_SCI;
             message.Head.SubMsgNum = MoonProtocol.ServeClientInfo.MN_PROTOCOL_MAIN_ALL_CLIENT_LIST;
             this.moonClient.SendMessage(message);

@@ -206,6 +206,7 @@ namespace MoonLib.core
                     {
                         //将数据添加到缓存中，可能数据是粘包
                         Buffer.BlockCopy(buffer, 0, data, currentLen, count);
+                        currentLen += count;
                         //拷贝完成之后，查找是否有包尾标识，如果有那么表示有完整数据
                         ProcessCacheDataPkg(ref data,ref currentLen);
                     }
@@ -242,7 +243,7 @@ namespace MoonLib.core
             {
                 if (data[i] != headFlag[i])
                 {
-                    LogUtil.Error("解析数据包出错，数据包头部标识错误，数据包内容：", Encoding.UTF8.GetString(data));
+                    //LogUtil.Error("解析数据包出错，数据包头部标识错误，数据包内容：", Encoding.UTF8.GetString(data));
                     return null;
                 }
             }
@@ -252,7 +253,7 @@ namespace MoonLib.core
             {
                 if (tailFlag[j] != data[i])
                 {
-                    LogUtil.Error("解析数据包出错，数据包尾部标识错误，数据包内容：", Encoding.UTF8.GetString(data));
+                    //LogUtil.Error("解析数据包出错，数据包尾部标识错误，数据包内容：", Encoding.UTF8.GetString(data));
                     return null;
                 }
             }
@@ -474,35 +475,45 @@ namespace MoonLib.core
             {
                 //查找到包尾结束标识
                 byte[] bData = new byte[pos + MoonProtocol.Packge.PKG_TAIL_LENGTH + 1];
-                Buffer.BlockCopy(data, 0, data, 0, pos + MoonProtocol.Packge.PKG_TAIL_LENGTH + 1);
+                Buffer.BlockCopy(data, 0, bData, 0, pos + MoonProtocol.Packge.PKG_TAIL_LENGTH + 1);
 
                 //将源字节数据后面的数据保留
                 currentLen = currentLen - pos - MoonProtocol.Packge.PKG_TAIL_LENGTH - 1;
-                byte[] remainData = new byte[currentLen];
-                Buffer.BlockCopy(data, pos + MoonProtocol.Packge.PKG_TAIL_LENGTH, remainData, 0, currentLen);
+                if (currentLen > 0)
+                {
+                    byte[] remainData = new byte[currentLen];
+                    Buffer.BlockCopy(data, pos + MoonProtocol.Packge.PKG_TAIL_LENGTH, remainData, 0, currentLen);
 
-                //将数据放入缓存
-                for (int i = 0; i < MoonProtocol.Packge.PKG_BYTE_MAX_LENGTH; i++)
-                {
-                    if (i < currentLen)
+                    //将数据放入缓存
+                    for (int i = 0; i < MoonProtocol.Packge.PKG_BYTE_MAX_LENGTH; i++)
                     {
-                        data[i] = remainData[i];
+                        if (i < currentLen)
+                        {
+                            data[i] = remainData[i];
+                        }
+                        else
+                        {
+                            data[i] = 0x00; //后面全部置为0
+                        }
                     }
-                    else
+
+                    List<string> strDataPkg = ParsePkgData(bData, pos + MoonProtocol.Packge.PKG_TAIL_LENGTH + 1);
+                    if (strDataPkg != null && strDataPkg.Count > 0)
                     {
-                        data[i] = 0x00; //后面全部置为0
+                        for (int i = 0; i < strDataPkg.Count; i++)
+                        {
+                            DataPackageParse(strDataPkg[i]);
+                        }
                     }
+                    ProcessCacheDataPkg(ref data, ref currentLen);//递归调用，可能存在多条完整数据包
                 }
-                
-                List<string> strDataPkg = ParsePkgData(bData, pos + MoonProtocol.Packge.PKG_TAIL_LENGTH + 1);
-                if (strDataPkg != null && strDataPkg.Count > 0)
+                else
                 {
-                    for (int i = 0; i < strDataPkg.Count; i++)
-                    {
-                        DataPackageParse(strDataPkg[i]);   
-                    }
+                    //重置当前长度
+                    currentLen = 0;
+                    //将数据清空
+                    data = new byte[MoonProtocol.Packge.PKG_BYTE_MAX_LENGTH];
                 }
-                ProcessCacheDataPkg(ref data, ref currentLen);//递归调用，可能存在多条完整数据包
             }
         }
 

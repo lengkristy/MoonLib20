@@ -10,6 +10,7 @@ using MoonLib.entity.message;
 using MoonLib.core.cmm;
 using System.Threading;
 using MoonLib.core.common;
+using MoonLib.exp.pkg;
 
 namespace MoonLib.core
 {
@@ -192,11 +193,14 @@ namespace MoonLib.core
                     int count = this.clientSocket.Receive(buffer); //方法会被阻塞
                     
                     //解析数据
-                    string strData = ParsePkgData(buffer, count);
+                    List<string> strDataPkg = ParsePkgData(buffer, count);
 
-                    if (!string.IsNullOrEmpty(strData))
+                    if (strDataPkg != null && strDataPkg.Count > 0)
                     {
-                        DataPackageParse(strData);
+                        for (int i = 0; i < strDataPkg.Count; i++)
+                        {
+                            DataPackageParse(strDataPkg[i]);
+                        }
                     }
                     else
                     {
@@ -228,8 +232,8 @@ namespace MoonLib.core
 
         }
 
-        //解析包数据，如果成功返回string json数据包，如果失败则返回null
-        private string ParsePkgData(byte[] data,int len)
+        //解析包数据，如果成功返回string json数据包，如果失败则返回null，如果是多条，那么返回list
+        private List<string> ParsePkgData(byte[] data,int len)
         {
             //判断包头是否一致
             byte[] headFlag = Encoding.UTF8.GetBytes(MoonProtocol.Packge.PKG_HEAD_FLAG);
@@ -238,10 +242,25 @@ namespace MoonLib.core
             {
                 if (data[i] != headFlag[i])
                 {
-                    //改成异常的方式抛出
                     LogUtil.Error("解析数据包出错，数据包头部标识错误，数据包内容：", Encoding.UTF8.GetString(data));
                     return null;
                 }
+            }
+
+            //判断包尾是否一致
+            for (int i = len - tailFlag.Length, j = 0; i < len; i++,j++)
+            {
+                if (tailFlag[j] != data[i])
+                {
+                    LogUtil.Error("解析数据包出错，数据包尾部标识错误，数据包内容：", Encoding.UTF8.GetString(data));
+                    return null;
+                }
+            }
+            byte[] bData = new byte[len - MoonProtocol.Packge.PKG_HEAD_LENGTH - MoonProtocol.Packge.PKG_TAIL_LENGTH];
+            //
+            for (int i = MoonProtocol.Packge.PKG_HEAD_LENGTH, j = 0; i < len - tailFlag.Length; i++, j++)
+            {
+                bData[j] = data[i];
             }
 
             //数组的第9到12个字节为数据体长度
@@ -262,25 +281,172 @@ namespace MoonLib.core
             int iLen = Convert.ToInt32(tmpLen);
             if (iLen != len - MoonProtocol.Packge.PKG_HEAD_LENGTH - MoonProtocol.Packge.PKG_TAIL_LENGTH)
             {
-                LogUtil.Error("解析的数据包长度与接收的长度不一致：", Encoding.UTF8.GetString(data));
-                return null;
+                //有可能是多条包在一起
+                byte[] tmpData = new byte[len];
+                Buffer.BlockCopy(data, 0, tmpData, 0, len);
+                List<string> pkgStrList = ParseMultiPkg(tmpData);
+                if (pkgStrList == null || pkgStrList.Count == 0)
+                {
+                    LogUtil.Error("解析的数据包发生错误", Encoding.UTF8.GetString(data));
+                    return null;
+                }
+                return pkgStrList;
             }
+            List<string> dataPkgStrList = new List<string>();
+            dataPkgStrList.Add(Encoding.UTF8.GetString(bData));
+            return dataPkgStrList;
+        }
+
+        /// <summary>
+        /// 解析多条数据包
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        List<string> ParseMultiPkg(byte[] data)
+        {
+            //查找第一次出现包结束标识的位置
+            List<string> strPkgList = new List<string>();
+            int pos = FindBytesFirstPos(data, Encoding.UTF8.GetBytes(MoonProtocol.Packge.PKG_TAIL_FLAG));
+            while (pos != -1)
+            {
+                //
+                try
+                {
+                    byte[] tmpData = new byte[pos + MoonProtocol.Packge.PKG_TAIL_LENGTH];
+                    for (int i = 0; i < pos + MoonProtocol.Packge.PKG_TAIL_LENGTH; i++)
+                    {
+                        tmpData[i] = data[i];
+                    }
+                    string strPkg = ParseSinglePkg(tmpData);
+                    if (!string.IsNullOrEmpty(strPkg))
+                    {
+                        strPkgList.Add(strPkg);
+                    }
+                    //去掉已经处理的数据包字节
+                    if (data.Length - pos - MoonProtocol.Packge.PKG_TAIL_LENGTH > 0)
+                    {
+                        byte[] remainData = new byte[data.Length - pos - MoonProtocol.Packge.PKG_TAIL_LENGTH];
+                        for (int i = pos + MoonProtocol.Packge.PKG_TAIL_LENGTH, j = 0; i < data.Length; i++, j++)
+                        {
+                            remainData[j] = data[i];
+                        }
+                        data = remainData;
+                        pos = FindBytesFirstPos(data, Encoding.UTF8.GetBytes(MoonProtocol.Packge.PKG_TAIL_FLAG));
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                catch (PkgHeadFlagNotMatchException e)
+                {
+                    LogUtil.Error("解析多条数据包时发生错误：",e.Message);
+                    continue;
+                }
+                catch (PkgLengthNotMatchException e)
+                {
+                    LogUtil.Error("解析多条数据包时发生错误：", e.Message);
+                    continue;
+                }
+                catch (PkgTailFlagNotMatchException e)
+                {
+                    LogUtil.Error("解析多条数据包时发生错误：", e.Message);
+                    continue;
+                }
+            }
+            return strPkgList;
+        }
+
+        /// <summary>
+        /// 解析单条数据包
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        string ParseSinglePkg(byte[] data)
+        {
+            //判断包头是否一致
+            byte[] headFlag = Encoding.UTF8.GetBytes(MoonProtocol.Packge.PKG_HEAD_FLAG);
+            byte[] tailFlag = Encoding.UTF8.GetBytes(MoonProtocol.Packge.PKG_TAIL_FLAG);
+            for (int i = 0; i < headFlag.Length; i++)
+            {
+                if (data[i] != headFlag[i])
+                {
+                    //LogUtil.Error("解析数据包出错，数据包头部标识错误，数据包内容：", Encoding.UTF8.GetString(data));
+                    throw new PkgHeadFlagNotMatchException("解析数据包出错，数据包头部标识错误，数据包内容：" +  System.Text.Encoding.UTF8.GetString(data));
+                }
+            }
+
             //判断包尾是否一致
-            for (int i = len - tailFlag.Length, j = 0; i < len; i++,j++)
+            for (int i = data.Length - tailFlag.Length, j = 0; i < data.Length; i++, j++)
             {
                 if (tailFlag[j] != data[i])
                 {
-                    LogUtil.Error("解析数据包出错，数据包尾部标识错误，数据包内容：", Encoding.UTF8.GetString(data));
-                    return null;
+                    //LogUtil.Error("解析数据包出错，数据包尾部标识错误，数据包内容：", Encoding.UTF8.GetString(data));
+                    throw new PkgTailFlagNotMatchException("解析数据包出错，数据包尾部标识错误，数据包内容：" + Encoding.UTF8.GetString(data));
                 }
             }
-            byte[] bData = new byte[len - MoonProtocol.Packge.PKG_HEAD_LENGTH - MoonProtocol.Packge.PKG_TAIL_LENGTH];
+            byte[] bData = new byte[data.Length - MoonProtocol.Packge.PKG_HEAD_LENGTH - MoonProtocol.Packge.PKG_TAIL_LENGTH];
             //
-            for (int i = MoonProtocol.Packge.PKG_HEAD_LENGTH, j = 0; i < len - tailFlag.Length; i++, j++)
+            for (int i = MoonProtocol.Packge.PKG_HEAD_LENGTH, j = 0; i < data.Length - tailFlag.Length; i++, j++)
             {
                 bData[j] = data[i];
             }
-            return Encoding.UTF8.GetString(bData);
+
+            //数组的第9到12个字节为数据体长度
+            byte[] bLen = new byte[4];
+            bLen[0] = data[8];
+            bLen[1] = data[9];
+            bLen[2] = data[10];
+            bLen[3] = data[11];
+            string sLen = System.Text.Encoding.UTF8.GetString(bLen);
+            string tmpLen = sLen;
+            //去掉高位无效的填充0
+            for (int i = 0; i < sLen.Length; i++)
+            {
+                if (sLen[i] != '0')
+                    break;
+                tmpLen.Remove(i, 1);
+            }
+            int iLen = Convert.ToInt32(tmpLen);
+            if (iLen != data.Length - MoonProtocol.Packge.PKG_HEAD_LENGTH - MoonProtocol.Packge.PKG_TAIL_LENGTH)
+            {
+                //LogUtil.Error("解析数据包出错，解析的数据包的大小和实际大小不一致", Encoding.UTF8.GetString(data));
+                //return null;
+                throw new PkgLengthNotMatchException("解析数据包出错，解析的数据包的大小和实际大小不一致,数据包内容：" + Encoding.UTF8.GetString(data));
+            }
+            return System.Text.Encoding.UTF8.GetString(bData);
+        }
+
+        /// <summary>
+        /// 查找子字节数组第一次出现的位置，没有查找到则返回-1
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="findData"></param>
+        /// <returns></returns>
+        private int FindBytesFirstPos(byte[] data,byte[] findData)
+        {
+            int pos = -1;
+            for (int index = 0; index < data.Length; index++)
+            {
+                if (index + findData.Length <= data.Length)
+                {
+                    int i = 0;
+                    for (; i < findData.Length; i++)
+                    {
+                        if (data[index + i] != findData[i])
+                        {
+                            break;
+                        }
+                    }
+                    if (i == MoonProtocol.Packge.PKG_TAIL_LENGTH)
+                    {
+                        //index的位置就是当前查找到的位置
+                        pos = index;
+                        break;
+                    }
+                }
+            }
+            return pos;
         }
 
         //处理缓存包
@@ -328,8 +494,15 @@ namespace MoonLib.core
                     }
                 }
                 
-                string strData = ParsePkgData(bData, pos + MoonProtocol.Packge.PKG_TAIL_LENGTH + 1);
-                DataPackageParse(strData);
+                List<string> strDataPkg = ParsePkgData(bData, pos + MoonProtocol.Packge.PKG_TAIL_LENGTH + 1);
+                if (strDataPkg != null && strDataPkg.Count > 0)
+                {
+                    for (int i = 0; i < strDataPkg.Count; i++)
+                    {
+                        DataPackageParse(strDataPkg[i]);   
+                    }
+                }
+                ProcessCacheDataPkg(ref data, ref currentLen);//递归调用，可能存在多条完整数据包
             }
         }
 
@@ -347,7 +520,7 @@ namespace MoonLib.core
             {
                 this.DealSystemMessage(message);
             }
-            if (this.defaultCommunicator != null && this.defaultCommunicator.GetMessageCallback() != null && flag)
+            if ((this.defaultCommunicator.GetMessageCallback() != null) && flag)
             {
                 this.defaultCommunicator.GetMessageCallback().ServerMessageHandler(message);
             }

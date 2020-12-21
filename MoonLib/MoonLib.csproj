@@ -57,6 +57,9 @@
     <Compile Include="entity\message\ClientEnvironment.cs" />
     <Compile Include="entity\message\PTPMessage.cs" />
     <Compile Include="entity\MoonProtocol.cs" />
+    <Compile Include="exp\pkg\PkgHeadFlagNotMatchException.cs" />
+    <Compile Include="exp\pkg\PkgLengthNotMatchException.cs" />
+    <Compile Include="exp\pkg\PkgTailFlagNotMatchException.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="util\ByteUtil.cs" />
     <Compile Include="util\DateTimeUtil.cs" />

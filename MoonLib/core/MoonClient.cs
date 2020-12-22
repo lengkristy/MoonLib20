@@ -183,18 +183,28 @@ namespace MoonLib.core
         /// </summary>
         private void RecvServerMessage()
         {
-            byte[] data = new byte[MoonProtocol.Packge.PKG_BYTE_MAX_LENGTH];//数据缓存
+            byte[] data = new byte[MoonProtocol.Packge.PKG_BYTE_MAX_LENGTH * 2];//数据缓存
             int currentLen = 0;//当前接收的数据长度
             while (true)
             {
+                byte[] buffer = null;
+                int count = 0;
+                List<string> strDataPkg = null;
                 try
                 {
-                    byte[] buffer = new byte[MoonProtocol.Packge.PKG_BYTE_MAX_LENGTH];
-                    int count = this.clientSocket.Receive(buffer); //方法会被阻塞
-                    
-                    //解析数据
-                    List<string> strDataPkg = ParsePkgData(buffer, count);
+                    buffer = new byte[1024]; //每次读取1K的内容
+                    count = this.clientSocket.Receive(buffer); //方法会被阻塞
 
+                    //解析数据
+                    strDataPkg = ParsePkgData(buffer, count);
+                }
+                catch (Exception exception)
+                {
+                    LogUtil.Debug("解析数据出错：", exception.Message + "\r\n" + exception.StackTrace);
+                }
+                
+                try
+                {
                     if (strDataPkg != null && strDataPkg.Count > 0)
                     {
                         for (int i = 0; i < strDataPkg.Count; i++)
@@ -204,7 +214,6 @@ namespace MoonLib.core
                     }
                     else
                     {
-                        //将数据添加到缓存中，可能数据是粘包
                         Buffer.BlockCopy(buffer, 0, data, currentLen, count);
                         currentLen += count;
                         //拷贝完成之后，查找是否有包尾标识，如果有那么表示有完整数据
@@ -213,7 +222,7 @@ namespace MoonLib.core
                 }
                 catch (Exception exception)
                 {
-                    LogUtil.Debug("接收数据错误", exception.StackTrace);
+                    LogUtil.Error("接收数据错误", exception.Message + "\r\n" + exception.StackTrace);
                     if (this.defaultCommunicator != null && this.defaultCommunicator.GetMessageCallback() != null)
                     {
                         Message message = new Message
@@ -473,47 +482,46 @@ namespace MoonLib.core
 
             if (pos != -1)
             {
-                //查找到包尾结束标识
-                byte[] bData = new byte[pos + MoonProtocol.Packge.PKG_TAIL_LENGTH + 1];
-                Buffer.BlockCopy(data, 0, bData, 0, pos + MoonProtocol.Packge.PKG_TAIL_LENGTH + 1);
-
-                //将源字节数据后面的数据保留
-                currentLen = currentLen - pos - MoonProtocol.Packge.PKG_TAIL_LENGTH - 1;
-                if (currentLen > 0)
+                try
                 {
-                    byte[] remainData = new byte[currentLen];
-                    Buffer.BlockCopy(data, pos + MoonProtocol.Packge.PKG_TAIL_LENGTH, remainData, 0, currentLen);
+                    //查找到包尾结束标识
+                    byte[] bData = new byte[pos + MoonProtocol.Packge.PKG_TAIL_LENGTH ];
+                    Buffer.BlockCopy(data, 0, bData, 0, pos + MoonProtocol.Packge.PKG_TAIL_LENGTH);
 
-                    //将数据放入缓存
-                    for (int i = 0; i < MoonProtocol.Packge.PKG_BYTE_MAX_LENGTH; i++)
+                    //将源字节数据后面的数据保留
+                    currentLen = currentLen - pos - MoonProtocol.Packge.PKG_TAIL_LENGTH;
+                    if (currentLen > 0)
                     {
-                        if (i < currentLen)
-                        {
-                            data[i] = remainData[i];
-                        }
-                        else
-                        {
-                            data[i] = 0x00; //后面全部置为0
-                        }
-                    }
+                        byte[] remainData = new byte[currentLen];
+                        Buffer.BlockCopy(data, pos + MoonProtocol.Packge.PKG_TAIL_LENGTH, remainData, 0, currentLen);
 
-                    List<string> strDataPkg = ParsePkgData(bData, pos + MoonProtocol.Packge.PKG_TAIL_LENGTH + 1);
-                    if (strDataPkg != null && strDataPkg.Count > 0)
-                    {
-                        for (int i = 0; i < strDataPkg.Count; i++)
+                        //将数据放入缓存
+                        data = new byte[MoonProtocol.Packge.PKG_BYTE_MAX_LENGTH * 2];
+                        Buffer.BlockCopy(remainData, 0, data, 0, currentLen);
+
+                        List<string> strDataPkg = ParsePkgData(bData, pos + MoonProtocol.Packge.PKG_TAIL_LENGTH + 1);
+                        if (strDataPkg != null && strDataPkg.Count > 0)
                         {
-                            DataPackageParse(strDataPkg[i]);
+                            for (int i = 0; i < strDataPkg.Count; i++)
+                            {
+                                DataPackageParse(strDataPkg[i]);
+                            }
                         }
+                        ProcessCacheDataPkg(ref data, ref currentLen);//递归调用，可能存在多条完整数据包
                     }
-                    ProcessCacheDataPkg(ref data, ref currentLen);//递归调用，可能存在多条完整数据包
+                    else
+                    {
+                        //重置当前长度
+                        currentLen = 0;
+                        //将数据清空
+                        data = new byte[MoonProtocol.Packge.PKG_BYTE_MAX_LENGTH * 2];
+                    }
                 }
-                else
+                catch (Exception e)
                 {
-                    //重置当前长度
-                    currentLen = 0;
-                    //将数据清空
-                    data = new byte[MoonProtocol.Packge.PKG_BYTE_MAX_LENGTH];
+                    LogUtil.Error("处理缓存数据发生错误：", e.Message);
                 }
+                
             }
         }
 

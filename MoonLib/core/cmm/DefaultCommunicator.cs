@@ -67,9 +67,9 @@ namespace MoonLib.core.cmm
             message.Head.SubMsgNum = MoonProtocol.PointToPointMsg.MN_PROTOCOL_SUB_MSG_PTP_TEXT;
             
             PTPMessage ptpMsg = new PTPMessage();
-            ptpMsg.from_client_id = this.moonClient.getClientId();
-            ptpMsg.to_client_id = userId;
-            ptpMsg.context = strMsg;
+            ptpMsg.FromClientId = this.moonClient.getClientId();
+            ptpMsg.ToClientId = userId;
+            ptpMsg.Context= strMsg;
             message.Body.Content = JsonConvert.SerializeObject(ptpMsg);
             this.moonClient.SendMessage(message);
         }
@@ -172,19 +172,19 @@ namespace MoonLib.core.cmm
                 switch (message.Head.SubMsgNum)
                 {
                     case MoonProtocol.PointToPointMsg.MN_PROTOCOL_SUB_MSG_PTP_TEXT://文本消息
-                        ptpMessageCallback.ReceiveTextNewMessage(ptpMessage.from_client_id, ptpMessage.context);
+                        ptpMessageCallback.ReceiveTextNewMessage(ptpMessage.FromClientId, ptpMessage.Context);
                         break;
                     case MoonProtocol.PointToPointMsg.MN_PROTOCOL_SUB_MSG_PTP_EMOTICON://表情消息
-                        ptpMessageCallback.ReceiveEmoticonNewMessage(ptpMessage.from_client_id, ptpMessage.context);
+                        ptpMessageCallback.ReceiveEmoticonNewMessage(ptpMessage.FromClientId, ptpMessage.Context);
                         break;
                     case MoonProtocol.PointToPointMsg.MN_PROTOCOL_SUB_MSG_PTP_IMG://图片消息
-                        ptpMessageCallback.ReceiveImageNewMessage(ptpMessage.from_client_id, ptpMessage.context);
+                        ptpMessageCallback.ReceiveImageNewMessage(ptpMessage.FromClientId, ptpMessage.Context);
                         break;
                     case MoonProtocol.PointToPointMsg.MN_PROTOCOL_SUB_MSG_PTP_VIDE://短视频消息
-                        ptpMessageCallback.RecevieVideoNewMessage(ptpMessage.from_client_id, ptpMessage.context);
+                        ptpMessageCallback.RecevieVideoNewMessage(ptpMessage.FromClientId, ptpMessage.Context);
                         break;
                     case MoonProtocol.PointToPointMsg.MN_PROTOCOL_SUB_MSG_PTP_FILE: //文件传输消息
-                        ptpMessageCallback.ReceiveFileNewMessage(ptpMessage.from_client_id, ptpMessage.context);
+                        ptpMessageCallback.ReceiveFileNewMessage(ptpMessage.FromClientId, ptpMessage.Context);
                         break;
                     default:
                         break;
@@ -192,5 +192,30 @@ namespace MoonLib.core.cmm
             }
         }
 
+
+        public void SendPTPTextMessage(string toClientId, string context)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SendPTPEmoticonMessage(string toClientId, string context)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SendPTPImageMessage(string toClientId, string context)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SendPTPVideoMessage(string toClientId, string context)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SendPTPFileMessage(string toClientId, string context)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Text;
 using MoonLib.core.cmm.callback;
+using MoonLib.core.cmm.sendmsg;
 
 namespace MoonLib.core.cmm
 {
     /// <summary>
     /// 通信接口
     /// </summary>
-    public interface ICommunicator
+    public interface ICommunicator : ISendSysMessage, ISendPTPMessage
     {
 
         /// <summary>
@@ -18,11 +19,6 @@ namespace MoonLib.core.cmm
         /// <param name="ptpMessageCallback"></param>
         /// <param name="broadcastMessageCallback"></param>
         void RegistCallback(SysMessageCallback sysMessageCallback,PTPMessageCallback ptpMessageCallback,BroadcastMessageCallback broadcastMessageCallback);
-
-        /// <summary>
-        /// 获取服务器客户端列表
-        /// </summary>
-        void GetServerClientInfoList();
 
 
         /// <summary>
